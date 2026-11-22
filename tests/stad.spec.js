@@ -80,8 +80,9 @@ test.describe('Staden', () => {
     expect(l.torn.sort()).toEqual(['svampkartan', 'tillsatskoll']);
     expect(l.distrikt.find((d) => d.namn === 'appspec').gammal).toBe(true);
     expect(l.distrikt.find((d) => d.namn === 'jaktvind').gammal).toBe(false);
-    // Fler issues ger fler bilar (trafik)
+    // Fler issues ger fler bilar (trafik), och de kör åt olika håll på båda sorters vägar
     expect(l.bilar).toBeGreaterThan(l.distrikt.length);
+    expect(l.bilRiktningar.sort()).toEqual(['i:-1', 'i:1', 'j:-1', 'j:1']);
 
     await page.getByRole('button', { name: 'appspec', exact: true }).focus();
     await page.keyboard.press('Enter');

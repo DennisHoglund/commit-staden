@@ -107,25 +107,33 @@
       return { repo: r, namn: r.namn, zon, gammal, i0, j0, hus, mitt: { i: i0 + c, j: j0 + c } };
     });
 
-    // Bilar: några på vägarna runt varje distrikt (trafik). Bilar i samma fil kör lika fort
-    // och med jämnt avstånd, så att de aldrig kör igenom varandra.
+    // Bilar: några på vägarna runt varje distrikt (trafik). Väg och riktning slumpas per bil
+    // (stabilt via hash). Bilar i samma fil kör lika fort och fördelas jämnt längs filen,
+    // så att de aldrig kör igenom varandra.
     const bilar = [];
     distrikt.forEach((d) => {
       const n = 1 + Math.min(6, d.repo.issues || 0);
       for (let m = 0; m < n; m++) {
-        const langsI = m % 2 === 0;
-        const rikt = m % 4 < 2 ? 1 : -1;
-        const len = langsI ? storlek.i : storlek.j;
-        const iFil = Math.floor(m / 4) + 1; // hur många bilar som redan finns i den här filen
+        const langsI = hash(d.namn, m, 'vag') < 0.5;
         bilar.push({
           langsI,
           fast: langsI ? d.j0 - 1 : d.i0 - 1,
-          start: (hash(d.namn, langsI, rikt) * len + iFil * len / 3.2) % len,
+          rikt: hash(d.namn, m, 'rikt') < 0.5 ? 1 : -1,
           fart: 0.9,
-          rikt,
-          farg: (m + Math.floor(hash(d.namn) * 3)) % 3
+          farg: Math.floor(hash(d.namn, m, 'farg') * 3)
         });
       }
+    });
+    const filer = new Map();
+    bilar.forEach((b) => {
+      const k = b.langsI + ':' + b.fast + ':' + b.rikt;
+      if (!filer.has(k)) filer.set(k, []);
+      filer.get(k).push(b);
+    });
+    filer.forEach((lista, k) => {
+      const len = lista[0].langsI ? storlek.i : storlek.j;
+      const bas = hash(k) * len;
+      lista.forEach((b, n) => { b.start = (bas + n * len / lista.length) % len; });
     });
 
     return { storlek, distrikt, bilar };
@@ -555,6 +563,7 @@
       byggen: S.stad.distrikt.filter((d) => d.hus.some((t) => t.typ === 'bygge')).map((d) => d.namn),
       torn: S.stad.distrikt.filter((d) => d.hus.some((t) => t.typ === 'torn')).map((d) => d.namn),
       bilar: S.stad.bilar.length,
+      bilRiktningar: [...new Set(S.stad.bilar.map((b) => (b.langsI ? 'i' : 'j') + ':' + b.rikt))],
       kamera: { ...S.kam },
       bredd: (S.stad.storlek.i + S.stad.storlek.j) * TW / 2 * S.kam.s,
       tema: S.tema,
