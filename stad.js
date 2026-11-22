@@ -80,16 +80,17 @@
       const j0 = Math.floor(k / kol) * STEG + 1;
       const gammal = dagarSedan(r.senast) > GAMMAL_DAGAR;
       const zon = zonFor(r.sprak);
-      const antal = Math.min(BLOCK * BLOCK - (r.prOppna ? 1 : 0), Math.max(1, Math.ceil((r.commits || 0) / 10)));
+      // En byggnad per 10 commits, men minst 3 så att små repon ser ut som kvarter
+      const antal = Math.min(BLOCK * BLOCK - (r.prOppna ? 1 : 0), Math.max(r.commits ? 3 : 1, Math.ceil((r.commits || 0) / 10)));
       const hus = [];
-      const maxH = 8 + Math.min(52, Math.sqrt(r.commits || 0) * 3.2);
+      const maxH = 16 + Math.min(50, Math.sqrt(r.commits || 0) * 3.5);
       for (let n = 0; n < BLOCK * BLOCK; n++) {
         const [a, b] = tomter[n];
         const t = { i: i0 + a, j: j0 + b, typ: 'tom' };
         if (n < antal) {
           const fall = n / Math.max(1, antal);
           t.typ = 'hus';
-          t.h = Math.round(Math.max(6, maxH * (1 - fall * 0.7) * (0.75 + hash(r.namn, n) * 0.5)));
+          t.h = Math.round(Math.max(11, maxH * (1 - fall * 0.6) * (0.75 + hash(r.namn, n) * 0.5)));
           t.w = 0.62 + hash(r.namn, n, 'w') * 0.22;
         } else if (n === antal && r.prOppna) {
           t.typ = 'bygge';
@@ -338,16 +339,22 @@
   }
 
   // ---------- Kamera ----------
+  // Visar hela staden på höjden. Kanterna får hamna lite utanför på bredden
+  // (max 1,5 gånger skärmbredden) så att staden fyller telefonen.
   function centrera() {
     if (!S.stad) return;
     const { storlek } = S.stad;
     const minX = -storlek.j * TW / 2, maxX = storlek.i * TW / 2;
-    const minY = -90, maxY = (storlek.i + storlek.j) * TH / 2;
-    const tillgH = Math.max(200, S.h - 260);
-    const s = Math.min(2.2, Math.max(0.4, Math.min((S.w - 24) / (maxX - minX), tillgH / (maxY - minY))));
+    const hogst = Math.max(40, ...S.stad.distrikt.flatMap((d) => d.hus.map((t) => (t.h || 0) + (t.typ === 'torn' ? 24 : 0))));
+    const minY = -hogst - 20, maxY = (storlek.i + storlek.j) * TH / 2;
+    const topp = 150, botten = 140;
+    const tillgH = Math.max(200, S.h - topp - botten);
+    const breddFit = (S.w - 16) / (maxX - minX);
+    const hojdFit = tillgH / (maxY - minY);
+    const s = Math.min(2.4, Math.max(0.35, Math.min(hojdFit, breddFit * 1.5)));
     S.kam.s = s;
     S.kam.x = S.w / 2 - (minX + maxX) / 2 * s;
-    S.kam.y = 150 + (tillgH - (maxY - minY) * s) / 2 - minY * s;
+    S.kam.y = topp + (tillgH - (maxY - minY) * s) / 2 - minY * s;
     rita();
   }
 
@@ -504,6 +511,7 @@
       torn: S.stad.distrikt.filter((d) => d.hus.some((t) => t.typ === 'torn')).map((d) => d.namn),
       bilar: S.stad.bilar.length,
       kamera: { ...S.kam },
+      bredd: (S.stad.storlek.i + S.stad.storlek.j) * TW / 2 * S.kam.s,
       tema: S.tema,
       vald: S.vald
     };

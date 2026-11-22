@@ -8,7 +8,7 @@
 | **Prioritet** | Hög |
 | **Typ** | 🤖 Automatiserad |
 | **Krav** | [SPEC.md](../../SPEC.md) |
-| **Playwright** | [`tests/stad.spec.js`](../../tests/stad.spec.js#L59) – *rött bygge syns som brand och i nyhetsraden* |
+| **Playwright** | [`tests/stad.spec.js`](../../tests/stad.spec.js#L64) – *rött bygge syns som brand och i nyhetsraden* |
 
 ## Förutsättningar
 

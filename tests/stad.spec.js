@@ -4,7 +4,12 @@ test.describe('Staden', () => {
   test('demostaden ritas med ett distrikt per repo', { annotation: { type: 'testfall', description: 'TC-STA-01' } }, async ({ staden: page }) => {
     const antal = await page.evaluate(() => window.CsDemo.repon.length);
     await expect(page.locator('#distrikt-lista button')).toHaveCount(antal);
-    expect((await lage(page)).distrikt).toHaveLength(antal);
+    const l = await lage(page);
+    expect(l.distrikt).toHaveLength(antal);
+    // Staden fyller skärmen på bredden (kanterna får gå utanför)
+    expect(l.bredd).toBeGreaterThanOrEqual(page.viewportSize().width - 16);
+    // Små repon blir minst tre hus
+    expect(Math.min(...l.distrikt.map((d) => d.hus))).toBeGreaterThanOrEqual(3);
     await expect(page.locator('#btn-konto')).toHaveText('Demo');
 
     // Canvasen ska innehålla mer än bakgrundsfärg

@@ -21,7 +21,7 @@ Varje repo är ett distrikt, och det som händer i repot syns i staden: commits 
 
 ### 3.2 Skärmen
 - **HUD** överst: Invånare, Budget, Nöjdhet, Bränder, datum och antal distrikt. Knappen uppe till höger visar **Demo** eller ditt GitHub-namn och öppnar GitHub-kortet.
-- **Staden** fyller skärmen. Dra för att flytta, nyp (två fingrar) eller scrolla för att zooma.
+- **Staden** fyller skärmen: Centrera visar hela höjden och låter kanterna gå utanför på bredden (högst 1,5 gånger skärmbredden). Dra för att flytta, nyp (två fingrar) eller scrolla för att zooma.
 - **Nyhetsrad** ovanför verktygen visar händelser, en i taget var 6:e sekund. Tryck öppnar distriktet.
 - **Verktyg**: Centrera, GitHub och Tema.
 - **GitHub-kort**: anslut med token (med instruktion för att skapa en), eller Uppdatera/Logga ut när man är ansluten.
@@ -34,7 +34,7 @@ Varje repo är ett distrikt, och det som händer i repot syns i staden: commits 
 | I staden | Från repot |
 |---|---|
 | Distrikt (4×4 tomter) | ett repo, sorterade efter antal commits |
-| Byggnader | en per 10 commits (max 16), högst i mitten |
+| Byggnader | en per 10 commits, minst 3 och högst 16, högst hus i mitten |
 | Höjd | växer med antal commits |
 | Zon och färg | språk: JS/TS = bostäder (grönt), HTML/CSS = centrum (turkos), C#/Java/Python m.fl. = industri (gult), annat = blandat (grått) |
 | Torn med blinkande topp | release finns |

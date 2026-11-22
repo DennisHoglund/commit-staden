@@ -8,7 +8,7 @@
 | **Prioritet** | Hög |
 | **Typ** | 🤖 Automatiserad |
 | **Krav** | [SPEC.md](../../SPEC.md) |
-| **Playwright** | [`tests/stad.spec.js`](../../tests/stad.spec.js#L40) – *tryck på ett distrikt öppnar distriktskortet* |
+| **Playwright** | [`tests/stad.spec.js`](../../tests/stad.spec.js#L45) – *tryck på ett distrikt öppnar distriktskortet* |
 
 ## Förutsättningar
 

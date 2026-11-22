@@ -8,7 +8,7 @@
 | **Prioritet** | Medel |
 | **Typ** | 🤖 Automatiserad |
 | **Krav** | [SPEC.md](../../SPEC.md) |
-| **Playwright** | [`tests/stad.spec.js`](../../tests/stad.spec.js#L87) – *dra för att flytta staden och Centrera för att återställa* |
+| **Playwright** | [`tests/stad.spec.js`](../../tests/stad.spec.js#L92) – *dra för att flytta staden och Centrera för att återställa* |
 
 ## Förutsättningar
 

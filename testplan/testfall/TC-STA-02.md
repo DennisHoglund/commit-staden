@@ -8,7 +8,7 @@
 | **Prioritet** | Hög |
 | **Typ** | 🤖 Automatiserad |
 | **Krav** | [SPEC.md](../../SPEC.md) |
-| **Playwright** | [`tests/stad.spec.js`](../../tests/stad.spec.js#L22) – *HUD:en visar invånare, budget, nöjdhet och bränder* |
+| **Playwright** | [`tests/stad.spec.js`](../../tests/stad.spec.js#L27) – *HUD:en visar invånare, budget, nöjdhet och bränder* |
 
 ## Förutsättningar
 
