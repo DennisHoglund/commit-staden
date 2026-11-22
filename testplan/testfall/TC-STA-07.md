@@ -8,7 +8,7 @@
 | **Prioritet** | Låg |
 | **Typ** | 🤖 Automatiserad |
 | **Krav** | [SPEC.md](../../SPEC.md) |
-| **Playwright** | [`tests/stad.spec.js`](../../tests/stad.spec.js#L102) – *distrikten går att öppna med tangentbord och skärmläsare* |
+| **Playwright** | [`tests/stad.spec.js`](../../tests/stad.spec.js#L105) – *distrikten går att öppna med tangentbord och skärmläsare* |
 
 ## Förutsättningar
 

@@ -5,9 +5,9 @@ Automatiserade testfall körs dessutom av Playwright vid varje commit och är ko
 
 | | |
 |---|---|
-| **Testfall** | 14 |
-| **Automatiserade** | 11 (körs på iPhone/WebKit och Android/Chromium) |
-| **Manuella** | 3 (kräver riktig iPhone, fingrar eller skärmläsare) |
+| **Testfall** | 21 |
+| **Automatiserade** | 17 (körs på iPhone/WebKit och Android/Chromium) |
+| **Manuella** | 4 (kräver riktig iPhone, fingrar, skärmläsare eller riktigt GitHub-konto) |
 | **Senaste testrapport** | [dennishoglund.github.io/commit-staden/rapport/](https://dennishoglund.github.io/commit-staden/rapport/) |
 | **Krav** | [SPEC.md](../SPEC.md) |
 
@@ -25,6 +25,18 @@ Automatiserade testfall körs dessutom av Playwright vid varje commit och är ko
 | [TC-STA-06](testfall/TC-STA-06.md) | [Dra för att flytta staden och Centrera för att återställa](testfall/TC-STA-06.md) | Medel | 🤖 |
 | [TC-STA-07](testfall/TC-STA-07.md) | [Distrikten går att öppna med tangentbord och skärmläsare](testfall/TC-STA-07.md) | Låg | 🤖 |
 | [TC-STA-08](testfall/TC-STA-08.md) | [Nyp för att zooma](testfall/TC-STA-08.md) | Medel | 🖐️ |
+
+## GitHub
+
+| ID | Testfall | Prio | Typ |
+|---|---|---|---|
+| [TC-GIT-01](testfall/TC-GIT-01.md) | [Anslut med token bygger staden av mina repon](testfall/TC-GIT-01.md) | Hög | 🤖 |
+| [TC-GIT-02](testfall/TC-GIT-02.md) | [Fel token ger tydligt fel och sparas inte](testfall/TC-GIT-02.md) | Hög | 🤖 |
+| [TC-GIT-03](testfall/TC-GIT-03.md) | [Vad brinner? visar workflow, steg, fel och länk till körningen](testfall/TC-GIT-03.md) | Hög | 🤖 |
+| [TC-GIT-04](testfall/TC-GIT-04.md) | [Staden visas från senaste hämtningen när GitHub inte nås](testfall/TC-GIT-04.md) | Medel | 🤖 |
+| [TC-GIT-05](testfall/TC-GIT-05.md) | [Logga ut tar bort token och visar demostaden](testfall/TC-GIT-05.md) | Medel | 🤖 |
+| [TC-GIT-06](testfall/TC-GIT-06.md) | [Utgången token vid start visar demon och ber om ny token](testfall/TC-GIT-06.md) | Medel | 🤖 |
+| [TC-GIT-07](testfall/TC-GIT-07.md) | [Skapa token på iPhone och anslut](testfall/TC-GIT-07.md) | Hög | 🖐️ |
 
 ## Tema och design
 

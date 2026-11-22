@@ -13,6 +13,7 @@ module.exports = defineConfig({
   outputDir: 'test-results',
   reporter: [
     ['list'],
+    ...(CI ? [['github']] : []), // felande tester blir annoteringar i GitHub (syns i Commit-stadens "Vad brinner?")
     ['html', { outputFolder: 'rapport/playwright', open: 'never' }],
     ['./tests/rapport-reporter.js', { outputDir: 'rapport' }]
   ],

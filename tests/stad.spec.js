@@ -5,7 +5,7 @@ test.describe('Staden', () => {
     const antal = await page.evaluate(() => window.CsDemo.repon.length);
     await expect(page.locator('#distrikt-lista button')).toHaveCount(antal);
     expect((await lage(page)).distrikt).toHaveLength(antal);
-    await expect(page.locator('#demo-badge')).toBeVisible();
+    await expect(page.locator('#btn-konto')).toHaveText('Demo');
 
     // Canvasen ska innehålla mer än bakgrundsfärg
     const farger = await page.evaluate(() => {
@@ -64,6 +64,9 @@ test.describe('Staden', () => {
     await expect(page.locator('#kort-titel')).toHaveText('elkoll');
     await expect(page.locator('#kort-siffror')).toContainText('Rött');
     await expect(page.locator('#kort-siffror')).toContainText('huset brinner');
+    // Demon visar också varför det brinner
+    await expect(page.locator('#kort-brand')).toBeVisible();
+    await expect(page.locator('#brand-workflow')).toContainText('Kör Playwright-testerna');
   });
 
   test('öppen PR, release och gamla repon syns i staden', { annotation: { type: 'testfall', description: 'TC-STA-05' } }, async ({ staden: page }) => {

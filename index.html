@@ -34,7 +34,7 @@
         <h1>Commit-staden</h1>
         <span id="hud-datum" class="hud-sub"></span>
       </div>
-      <span id="demo-badge" class="badge">Demo</span>
+      <button id="btn-konto" class="badge" type="button" aria-label="GitHub-konto">Demo</button>
     </div>
     <dl class="hud-siffror">
       <div><dt>Invånare</dt><dd id="hud-invanare" class="accent">–</dd></div>
@@ -46,6 +46,8 @@
 
   <ul id="distrikt-lista" class="sr-only" aria-label="Distrikt i staden"></ul>
 
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
   <button id="ticker" class="ticker" type="button" hidden>
     <span class="ticker-prick" aria-hidden="true"></span>
     <span id="ticker-text"></span>
@@ -55,6 +57,10 @@
     <button class="verktyg-knapp" id="btn-centrera" type="button">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4"/><circle cx="12" cy="12" r="2.5"/></svg>
       Centrera
+    </button>
+    <button class="verktyg-knapp" id="btn-github" type="button">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="9" r="2.5"/><path d="M6 8.5v7M18 11.5c0 3-3 4-9.5 5.5"/></svg>
+      GitHub
     </button>
     <button class="verktyg-knapp" id="btn-theme" type="button" aria-label="Byt tema">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>
@@ -73,11 +79,62 @@
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
       </button>
     </div>
+    <section id="kort-brand" class="brand" aria-labelledby="brand-rubrik" hidden>
+      <h3 id="brand-rubrik"><span class="brand-prick" aria-hidden="true"></span>Vad brinner?</h3>
+      <p id="brand-workflow" class="brand-workflow"></p>
+      <ul id="brand-fel" class="brand-fel"></ul>
+      <p id="brand-commit" class="brand-commit"></p>
+      <a id="brand-lank" class="knapp primar" href="#" target="_blank" rel="noopener">Öppna körningen på GitHub</a>
+    </section>
     <dl id="kort-siffror" class="kort-siffror"></dl>
     <p id="kort-status" class="kort-status"></p>
+    <a id="kort-repo" class="knapp" href="#" target="_blank" rel="noopener" hidden>Öppna repot på GitHub</a>
+  </section>
+
+  <section id="gh-kort" class="kort" role="dialog" aria-labelledby="gh-titel" hidden>
+    <div class="kort-handtag" aria-hidden="true"></div>
+    <div class="kort-topp">
+      <div>
+        <p class="kort-zon">GitHub</p>
+        <h2 id="gh-titel">Anslut GitHub</h2>
+      </div>
+      <button class="rund-knapp" id="btn-gh-stang" type="button" aria-label="Stäng">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+
+    <div id="gh-ut">
+      <p class="kort-text">Staden byggs av dina riktiga repon. Token sparas bara i den här telefonen och behöver bara läsrätt.</p>
+      <form id="form-token" novalidate>
+        <label for="token">Token</label>
+        <input id="token" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="github_pat_…">
+        <button class="knapp primar" type="submit">Anslut</button>
+      </form>
+      <p id="token-msg" class="msg" role="status" aria-live="polite"></p>
+      <details class="hjalp">
+        <summary>Så skapar du en token</summary>
+        <ol>
+          <li>Öppna <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Fine-grained token på GitHub</a>.</li>
+          <li>Namn: <b>Commit-staden</b>. Expiration: till exempel 1 år.</li>
+          <li>Repository access: <b>All repositories</b>.</li>
+          <li>Permissions › Repository: sätt <b>Actions</b>, <b>Contents</b>, <b>Issues</b> och <b>Pull requests</b> till <b>Read-only</b>. Metadata blir Read-only av sig själv.</li>
+          <li>Tryck <b>Generate token</b>, kopiera och klistra in här.</li>
+        </ol>
+      </details>
+    </div>
+
+    <div id="gh-in" hidden>
+      <p class="kort-text">Inloggad som <b id="gh-login"></b></p>
+      <p id="gh-status" class="kort-status"></p>
+      <div class="knapprad">
+        <button class="knapp primar" id="btn-uppdatera" type="button">Uppdatera</button>
+        <button class="knapp" id="btn-loggaut" type="button">Logga ut</button>
+      </div>
+    </div>
   </section>
 
   <script src="demo.js"></script>
+  <script src="github.js"></script>
   <script src="stad.js"></script>
   <script src="app.js"></script>
   <script>

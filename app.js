@@ -1,9 +1,10 @@
-// Appens skal: tema, HUD, nyhetsrad och distriktskort.
+// Appens skal: tema, GitHub-anslutning, HUD, nyhetsrad och distriktskort.
 (function () {
   'use strict';
 
   const $ = (id) => document.getElementById(id);
   const THEME_KEY = 'cs-theme';
+  const GH = window.CsGithub;
 
   const store = {
     get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
@@ -13,17 +14,20 @@
 
   const tal = (n) => Number(n || 0).toLocaleString('sv-SE');
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const klocka = (iso) => new Date(iso).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
 
   function dagarSedan(iso) {
     const t = Date.parse(iso);
     return isNaN(t) ? null : Math.floor((Date.now() - t) / 86400000);
   }
   function nar(iso) {
-    const d = dagarSedan(iso);
-    if (d == null) return '–';
-    if (d <= 0) return 'i dag';
-    if (d === 1) return 'i går';
-    return 'för ' + d + ' dagar sedan';
+    const t = Date.parse(iso);
+    if (isNaN(t)) return '–';
+    const min = Math.floor((Date.now() - t) / 60000);
+    if (min < 60) return min <= 1 ? 'nyss' : 'för ' + min + ' min sedan';
+    if (min < 24 * 60) return 'för ' + Math.floor(min / 60) + ' h sedan';
+    const d = Math.floor(min / 1440);
+    return d === 1 ? 'i går' : 'för ' + d + ' dagar sedan';
   }
 
   // ---------- Tema ----------
@@ -51,12 +55,28 @@
   });
   ljusQuery.addEventListener('change', () => applyTheme(currentTheme()));
 
-  // ---------- Data ----------
-  const repon = (window.CsDemo && window.CsDemo.repon) || [];
-  const perNamn = new Map(repon.map((r) => [r.namn, r]));
+  // ---------- Läge ----------
+  const lage = { repon: [], perNamn: new Map(), demo: true, login: '', tid: '', hamtar: false };
+
+  function visa(repon, info) {
+    lage.repon = repon;
+    lage.perNamn = new Map(repon.map((r) => [r.namn, r]));
+    lage.demo = !!info.demo;
+    lage.login = info.login || '';
+    lage.tid = info.tid || '';
+    $('kort').hidden = true;
+    window.CsStad.sattRepon(repon);
+    hud();
+    lista();
+    tickerLista = handelser();
+    tickerIndex = 0;
+    visaTicker();
+    konto();
+  }
 
   // ---------- HUD ----------
   function hud() {
+    const repon = lage.repon;
     const sum = (f) => repon.reduce((s, r) => s + (r[f] || 0), 0);
     const andelar = repon.filter((r) => typeof r.ciAndel === 'number');
     const nojd = andelar.length ? Math.round(andelar.reduce((s, r) => s + r.ciAndel, 0) / andelar.length * 100) : null;
@@ -70,18 +90,27 @@
     $('hud-datum').textContent = d.toLocaleDateString('sv-SE', { weekday: 'short', day: 'numeric', month: 'short' }) + ' · ' + repon.length + ' distrikt';
   }
 
+  function konto() {
+    const b = $('btn-konto');
+    b.textContent = lage.hamtar && lage.demo ? 'Hämtar…' : lage.demo ? 'Demo' : lage.login;
+    b.setAttribute('aria-label', lage.demo ? 'Demoläge. Anslut GitHub' : 'GitHub-konto ' + lage.login);
+  }
+
   // ---------- Händelser till nyhetsraden ----------
   function handelser() {
     const h = [];
-    repon.forEach((r) => {
+    lage.repon.forEach((r) => {
       const d = dagarSedan(r.senast);
-      if (r.ci === 'fel') h.push({ typ: 'brand', namn: r.namn, text: 'Brand i ' + r.namn + '! Bygget på main är rött' });
+      if (r.ci === 'fel') {
+        const steg = r.brand && r.brand.steg && r.brand.steg[0] ? ' (' + r.brand.steg[0].split(' › ').pop() + ')' : '';
+        h.push({ typ: 'brand', namn: r.namn, text: 'Brand i ' + r.namn + '! Bygget på main är rött' + steg });
+      }
       if (r.prOppna) h.push({ typ: 'bygge', namn: r.namn, text: 'Byggstart i ' + r.namn + ': ' + r.prOppna + ' öppen PR' });
       if (r.release) h.push({ typ: 'torn', namn: r.namn, text: 'Nytt landmärke i ' + r.namn + ': ' + r.release });
       if ((r.issues || 0) >= 3) h.push({ typ: 'trafik', namn: r.namn, text: 'Trafikstockning i ' + r.namn + ': ' + r.issues + ' öppna issues' });
       if (d != null && d > 45) h.push({ typ: 'gammal', namn: r.namn, text: r.namn + ' växer igen, ingen commit på ' + d + ' dagar' });
     });
-    const snabbast = [...repon].sort((a, b) => (b.veckans || 0) - (a.veckans || 0))[0];
+    const snabbast = [...lage.repon].sort((a, b) => (b.veckans || 0) - (a.veckans || 0))[0];
     if (snabbast && snabbast.veckans) h.push({ typ: 'vaxer', namn: snabbast.namn, text: snabbast.namn + ' växer snabbast: ' + snabbast.veckans + ' commits i veckan' });
     const ordning = { brand: 0, trafik: 1, bygge: 2, torn: 3, vaxer: 4, gammal: 5 };
     return h.sort((a, b) => ordning[a.typ] - ordning[b.typ]);
@@ -89,21 +118,35 @@
 
   let tickerIndex = 0;
   let tickerLista = [];
+  let tickerInfo = null;
   function visaTicker() {
-    if (!tickerLista.length) { $('ticker').hidden = true; return; }
-    const e = tickerLista[tickerIndex % tickerLista.length];
-    $('ticker').hidden = false;
-    $('ticker').dataset.typ = e.typ;
-    $('ticker').dataset.namn = e.namn;
+    const t = $('ticker');
+    const e = tickerInfo || tickerLista[tickerIndex % Math.max(1, tickerLista.length)];
+    if (!e) { t.hidden = true; return; }
+    t.hidden = false;
+    t.dataset.typ = e.typ;
+    t.dataset.namn = e.namn || '';
     $('ticker-text').textContent = e.text;
-    $('ticker').setAttribute('aria-label', e.text + '. Visa distriktet.');
+    t.setAttribute('aria-label', e.namn ? e.text + '. Visa distriktet.' : e.text);
   }
-  $('ticker').addEventListener('click', () => oppna($('ticker').dataset.namn));
+  $('ticker').addEventListener('click', () => { if ($('ticker').dataset.namn) oppna($('ticker').dataset.namn); });
+  setInterval(() => { tickerIndex++; visaTicker(); }, 6000);
+
+  let toastTimer = null;
+  function toast(text, fel) {
+    const t = $('toast');
+    t.textContent = text;
+    t.className = 'toast' + (fel ? ' fel' : '');
+    t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.hidden = true; }, 6000);
+  }
 
   // ---------- Distriktskort ----------
   function oppna(namn) {
-    const r = perNamn.get(namn);
-    if (!r) { stang(); return; }
+    const r = lage.perNamn.get(namn);
+    if (!r) { stangAlla(); return; }
+    $('gh-kort').hidden = true;
     const zon = window.CsStad.ZON[window.CsStad.zonFor(r.sprak)].namn;
     const info = window.CsStad.lage().distrikt.find((d) => d.namn === namn) || {};
     $('kort-zon').textContent = zon + ' · ' + (r.sprak || 'okänt språk');
@@ -112,7 +155,7 @@
     const rutor = [
       ['Invånare', tal(r.rader), 'rader kod', 'ok'],
       ['Byggnader', tal(info.hus), tal(r.commits) + ' commits', ''],
-      ['Bygget', ci[0], r.ci === 'fel' ? 'huset brinner' : 'på main', ci[1]],
+      ['Bygget', ci[0], r.ci === 'fel' ? 'huset brinner' : r.ci ? 'på main' : 'inga Actions', ci[1]],
       ['Veckan', tal(r.veckans), 'commits', ''],
       ['Öppna PR', tal(r.prOppna), r.prOppna ? 'byggkran' : '', ''],
       ['Issues', tal(r.issues), (r.issues || 0) >= 3 ? 'trafikstockning' : 'trafik', '']
@@ -123,33 +166,154 @@
     if (r.release) rad.push('landmärke ' + r.release);
     if (info.gammal) rad.push('distriktet växer igen');
     $('kort-status').textContent = rad.join(' · ');
+    brand(r);
+    $('kort-repo').hidden = !r.url;
+    if (r.url) $('kort-repo').href = r.url;
     $('kort').hidden = false;
+    $('kort').scrollTop = 0;
     window.CsStad.valj(namn);
     const hudBotten = document.querySelector('.hud').getBoundingClientRect().bottom;
     window.CsStad.fokus(namn, hudBotten, $('kort').getBoundingClientRect().top);
   }
 
-  function stang() {
+  // Varför brinner det?
+  function brand(r) {
+    const b = r.ci === 'fel' && r.brand;
+    $('kort-brand').hidden = !b;
+    if (!b) return;
+    $('brand-workflow').textContent = b.workflow + (b.steg && b.steg.length ? ' · ' + b.steg.join(' · ') : '');
+    $('brand-fel').innerHTML = (b.fel || []).map((f) => '<li>' + esc(f) + '</li>').join('');
+    $('brand-fel').hidden = !(b.fel && b.fel.length);
+    $('brand-commit').innerHTML = (b.sha ? '<code>' + esc(b.sha) + '</code> ' : '') +
+      (b.meddelande ? '”' + esc(b.meddelande) + '”' : '') +
+      (b.vem ? ' av ' + esc(b.vem) : '') + (b.tid ? ' · ' + esc(nar(b.tid)) : '');
+    $('brand-lank').hidden = !b.url;
+    if (b.url) $('brand-lank').href = b.url;
+  }
+
+  function stangAlla() {
     $('kort').hidden = true;
+    $('gh-kort').hidden = true;
     window.CsStad.valj(null);
   }
 
-  $('btn-stang').addEventListener('click', stang);
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('kort').hidden) stang(); });
-  $('btn-centrera').addEventListener('click', () => { stang(); window.CsStad.centrera(); });
+  $('btn-stang').addEventListener('click', stangAlla);
+  $('btn-gh-stang').addEventListener('click', stangAlla);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') stangAlla(); });
+  $('btn-centrera').addEventListener('click', () => { stangAlla(); window.CsStad.centrera(); });
 
   // Lista för skärmläsare (och tangentbord) med alla distrikt
-  $('distrikt-lista').innerHTML = repon.map((r) => '<li><button type="button" data-namn="' + esc(r.namn) + '">' + esc(r.namn) + '</button></li>').join('');
+  function lista() {
+    $('distrikt-lista').innerHTML = lage.repon.map((r) => '<li><button type="button" data-namn="' + esc(r.namn) + '">' + esc(r.namn) + '</button></li>').join('');
+  }
   $('distrikt-lista').addEventListener('click', (e) => {
     const b = e.target.closest('button[data-namn]');
     if (b) oppna(b.dataset.namn);
   });
 
+  // ---------- GitHub ----------
+  function oppnaGithub() {
+    stangAlla();
+    const inne = !!GH.token() && !lage.demo;
+    $('gh-ut').hidden = inne;
+    $('gh-in').hidden = !inne;
+    $('gh-titel').textContent = inne ? 'Ditt GitHub' : 'Anslut GitHub';
+    if (inne) {
+      $('gh-login').textContent = lage.login;
+      $('gh-status').textContent = 'Uppdaterad ' + (lage.tid ? klocka(lage.tid) : '–') + ' · ' + lage.repon.length + ' distrikt';
+    }
+    $('gh-kort').hidden = false;
+  }
+  $('btn-github').addEventListener('click', oppnaGithub);
+  $('btn-konto').addEventListener('click', oppnaGithub);
+
+  function setMsg(text, typ) {
+    $('token-msg').textContent = text || '';
+    $('token-msg').className = 'msg' + (typ ? ' ' + typ : '');
+  }
+
+  async function uppdatera(tok, franFormular) {
+    if (lage.hamtar) return;
+    lage.hamtar = true;
+    konto();
+    $('btn-uppdatera').disabled = true;
+    tickerInfo = { typ: 'info', text: 'Hämtar dina repon från GitHub…' };
+    visaTicker();
+    try {
+      const res = await GH.hamta(tok, (klara, totalt) => {
+        tickerInfo = { typ: 'info', text: 'Hämtar dina repon från GitHub… ' + klara + ' av ' + totalt };
+        visaTicker();
+      });
+      if (franFormular) {
+        GH.sparaToken(tok);
+        $('token').value = '';
+        setMsg('');
+        $('gh-kort').hidden = true;
+      }
+      tickerInfo = null;
+      lage.hamtar = false;
+      visa(res.repon, { login: res.login, tid: res.tid });
+      if (!$('gh-kort').hidden) oppnaGithub();
+      toast('Staden är byggd av ' + res.repon.length + ' repon');
+    } catch (e) {
+      tickerInfo = null;
+      lage.hamtar = false;
+      visaTicker();
+      konto();
+      const text = (e && e.message) || 'Något gick fel vid hämtningen.';
+      if (franFormular) {
+        setMsg(text, 'fel');
+      } else if (e && e.typ === 'token') {
+        GH.glomToken();
+        visa(window.CsDemo.repon, { demo: true });
+        oppnaGithub();
+        setMsg(text + ' Skapa en ny token och anslut igen.', 'fel');
+      } else {
+        const c = GH.lasCache();
+        toast(text + (c ? ' Visar staden från ' + klocka(c.tid) + '.' : ''), true);
+      }
+    } finally {
+      $('btn-uppdatera').disabled = false;
+    }
+  }
+
+  $('form-token').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const tok = $('token').value.trim();
+    if (!GH.rimligToken(tok)) {
+      setMsg('Det ser inte ut som en GitHub-token. Den börjar med github_pat_ eller ghp_.', 'fel');
+      return;
+    }
+    setMsg('Ansluter…');
+    uppdatera(tok, true);
+  });
+  $('btn-uppdatera').addEventListener('click', () => { const t = GH.token(); if (t) uppdatera(t, false); });
+  $('btn-loggaut').addEventListener('click', () => {
+    GH.glomToken();
+    visa(window.CsDemo.repon, { demo: true });
+    $('gh-kort').hidden = true;
+    toast('Utloggad. Token är borttagen från telefonen.');
+  });
+
   // ---------- Start ----------
-  window.CsStad.starta($('stad'), repon, { onValj: (namn) => (namn ? oppna(namn) : stang()) });
+  window.CsStad.starta($('stad'), [], { onValj: (namn) => (namn ? oppna(namn) : stangAlla()) });
   applyTheme(currentTheme());
-  hud();
-  tickerLista = handelser();
-  visaTicker();
-  setInterval(() => { tickerIndex++; visaTicker(); }, 6000);
+
+  const tok = GH.token();
+  const cache = GH.lasCache();
+  if (tok && cache) {
+    visa(cache.repon, { login: cache.login, tid: cache.tid });
+  } else {
+    visa(window.CsDemo.repon, { demo: true });
+  }
+  if (tok) uppdatera(tok, false);
+
+  // Hämta på nytt när appen öppnas igen efter en stund
+  let senast = Date.now();
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && GH.token() && Date.now() - senast > 5 * 60000) {
+      senast = Date.now();
+      uppdatera(GH.token(), false);
+    }
+  });
 })();

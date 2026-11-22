@@ -482,6 +482,13 @@
     S.klar = true;
   }
 
+  // Bygger om staden med nya repon (t.ex. efter hämtning från GitHub)
+  function sattRepon(repon) {
+    S.stad = bygg(repon);
+    S.vald = null;
+    if (S.canvas) centrera();
+  }
+
   function sattTema(tema) {
     S.tema = tema === 'light' ? 'light' : 'dark';
     rita();
@@ -503,7 +510,7 @@
   }
 
   window.CsStad = {
-    starta, rita, centrera, valj, fokus, sattTema, lage, skarmpunkt, bygg, zonFor, ZON,
+    starta, rita, centrera, valj, fokus, sattRepon, sattTema, lage, skarmpunkt, bygg, zonFor, ZON,
     get klar() { return S.klar; }
   };
 })();
