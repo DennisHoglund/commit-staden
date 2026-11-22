@@ -107,19 +107,23 @@
       return { repo: r, namn: r.namn, zon, gammal, i0, j0, hus, mitt: { i: i0 + c, j: j0 + c } };
     });
 
-    // Bilar: några på varje väg nära distrikt med öppna issues (trafik)
+    // Bilar: några på vägarna runt varje distrikt (trafik). Bilar i samma fil kör lika fort
+    // och med jämnt avstånd, så att de aldrig kör igenom varandra.
     const bilar = [];
-    distrikt.forEach((d, k) => {
+    distrikt.forEach((d) => {
       const n = 1 + Math.min(6, d.repo.issues || 0);
       for (let m = 0; m < n; m++) {
-        const langsI = hash(d.namn, m, 'r') < 0.5;
+        const langsI = m % 2 === 0;
+        const rikt = m % 4 < 2 ? 1 : -1;
+        const len = langsI ? storlek.i : storlek.j;
+        const iFil = Math.floor(m / 4) + 1; // hur många bilar som redan finns i den här filen
         bilar.push({
           langsI,
           fast: langsI ? d.j0 - 1 : d.i0 - 1,
-          start: hash(d.namn, m, 's') * (langsI ? storlek.i : storlek.j),
-          fart: 0.6 + hash(d.namn, m, 'v') * 0.9,
-          rikt: hash(d.namn, m, 'd') < 0.5 ? 1 : -1,
-          farg: m % 3
+          start: (hash(d.namn, langsI, rikt) * len + iFil * len / 3.2) % len,
+          fart: 0.9,
+          rikt,
+          farg: (m + Math.floor(hash(d.namn) * 3)) % 3
         });
       }
     });
@@ -230,10 +234,51 @@
     ctx.globalAlpha = 1;
   }
 
-  function bil(ctx, x, y, farg) {
-    const c = ['#EAFBEF', '#7FFFE0', '#FFC25A'][farg];
-    poly(ctx, [x - 3.2, y, x, y + 1.6, x + 3.2, y, x, y - 1.6], 'rgba(0,0,0,.35)');
-    poly(ctx, [x - 3, y - 1.4, x, y + 0.2, x + 3, y - 1.4, x, y - 3], c);
+  // Liten 3D-bil: kaross och tak som lådor längs vägen, strålkastare fram och bakljus bak.
+  // a = halva längden i färdriktningen, b = halva bredden (skärmvektorer).
+  const BILFARG = [
+    ['#EAFBEF', '#BFD6C6', '#93AC9B'],
+    ['#7FFFE0', '#4FCDB2', '#329A85'],
+    ['#FFC25A', '#D69A36', '#A87520']
+  ];
+  function lada3(ctx, p, a, b, z0, z1, f) {
+    const pt = (sa, sb, z) => [p.x + sa * a.x + sb * b.x, p.y + sa * a.y + sb * b.y - z];
+    const sA = a.y >= 0 ? 1 : -1, sB = b.y >= 0 ? 1 : -1;
+    poly(ctx, [...pt(sA, -1, z0), ...pt(sA, 1, z0), ...pt(sA, 1, z1), ...pt(sA, -1, z1)], f[2]);
+    poly(ctx, [...pt(-1, sB, z0), ...pt(1, sB, z0), ...pt(1, sB, z1), ...pt(-1, sB, z1)], f[1]);
+    poly(ctx, [...pt(-1, -1, z1), ...pt(1, -1, z1), ...pt(1, 1, z1), ...pt(-1, 1, z1)], f[0]);
+    return pt;
+  }
+  function bil(ctx, i, j, b0) {
+    const ui = { x: TW / 2, y: TH / 2 }, uj = { x: -TW / 2, y: TH / 2 };
+    const ax = b0.langsI ? ui : uj, vx = b0.langsI ? uj : ui;
+    const a = { x: ax.x * 0.3 * b0.rikt, y: ax.y * 0.3 * b0.rikt };
+    const b = { x: vx.x * 0.11, y: vx.y * 0.11 };
+    const p = iso(i, j);
+    const natt = S.tema === 'dark';
+    // Skugga
+    poly(ctx, [p.x - a.x - b.x, p.y - a.y - b.y + 1, p.x + a.x - b.x, p.y + a.y - b.y + 1, p.x + a.x + b.x, p.y + a.y + b.y + 1, p.x - a.x + b.x, p.y - a.y + b.y + 1], natt ? 'rgba(0,0,0,.35)' : 'rgba(15,42,24,.18)');
+    // Ljuskägla framför bilen på natten
+    if (natt) {
+      ctx.globalAlpha = 0.16;
+      poly(ctx, [p.x + a.x - b.x * 0.8, p.y + a.y - b.y * 0.8, p.x + a.x * 3.2 - b.x * 1.8, p.y + a.y * 3.2 - b.y * 1.8,
+        p.x + a.x * 3.2 + b.x * 1.8, p.y + a.y * 3.2 + b.y * 1.8, p.x + a.x + b.x * 0.8, p.y + a.y + b.y * 0.8], '#FFE9A0');
+      ctx.globalAlpha = 1;
+    }
+    const f = BILFARG[b0.farg % BILFARG.length];
+    const pt = lada3(ctx, p, a, b, 0.6, 4.2, f);
+    // Tak med mörka rutor, lite bakåt
+    const pc = { x: p.x - a.x * 0.15, y: p.y - a.y * 0.15 };
+    const glas = natt ? '#14201A' : '#3A4A42';
+    lada3(ctx, pc, { x: a.x * 0.55, y: a.y * 0.55 }, { x: b.x * 0.85, y: b.y * 0.85 }, 4.2, 7, [f[0], glas, glas]);
+    // Strålkastare om fronten syns, annars bakljus
+    const fram = a.y >= 0;
+    const sida = fram ? 1 : -1;
+    const lampa = fram ? '#FFE9A0' : '#FF4A3D';
+    [-0.62, 0.62].forEach((sb) => {
+      const q = (d, z) => pt(sida, sb + d, z);
+      poly(ctx, [...q(-0.22, 1.6), ...q(0.22, 1.6), ...q(0.22, 3), ...q(-0.22, 3)], lampa);
+    });
   }
 
   function rita() {
@@ -288,9 +333,9 @@
 
     for (const o of objekt) {
       if (o.bil) {
-        const p = iso(o.i, o.j);
-        const off = o.bil.rikt > 0 ? 2 : -2;
-        bil(ctx, p.x + (o.bil.langsI ? -off : off), p.y + off / 2, o.bil.farg);
+        // Högertrafik: körfältet förskjuts åt sidan beroende på riktning
+        const fil = o.bil.rikt > 0 ? 0.24 : -0.24;
+        bil(ctx, o.bil.langsI ? o.i : o.i - fil, o.bil.langsI ? o.j + fil : o.j, o.bil);
         continue;
       }
       const { d, t } = o;

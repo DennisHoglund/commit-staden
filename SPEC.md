@@ -40,7 +40,7 @@ Varje repo är ett distrikt, och det som händer i repot syns i staden: commits 
 | Torn med blinkande topp | release finns |
 | Byggarbetsplats med kran | öppen PR |
 | Brand med rök | senaste bygget på main är rött |
-| Bilar | trafik, fler vid öppna issues (stockning från 3) |
+| Bilar | trafik, fler vid öppna issues (stockning från 3). Små 3D-bilar med tak, strålkastare fram och bakljus bak, ljuskägla på natten. Högertrafik i två filer, bilar i samma fil kör lika fort med jämnt avstånd |
 | Grått distrikt med träd | ingen commit på 45 dagar (växer igen) |
 | Invånare (HUD) | rader kod totalt |
 | Budget (HUD) | commits i veckan |
