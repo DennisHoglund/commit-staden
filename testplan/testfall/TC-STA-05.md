@@ -20,7 +20,7 @@
 |---|---|---|
 | 1 | Titta på **kaloriappen** | En byggarbetsplats med kran (öppen PR) |
 | 2 | Titta på **svampkartan** och **tillsatskoll** | Ett högt torn med blinkande topp (release) |
-| 3 | Titta på **appspec** | Grått distrikt med många träd (växer igen) |
+| 3 | Titta på **appspec** | Grått distrikt med många träd. Kortet säger "står still, ingen commit på 2 månader" (över 1 år: "övergivet") |
 
 ## Resultat
 

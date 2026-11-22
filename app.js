@@ -20,6 +20,19 @@
     const t = Date.parse(iso);
     return isNaN(t) ? null : Math.floor((Date.now() - t) / 86400000);
   }
+  // "3 månader", "12 år" – hur länge sedan, avrundat
+  function langeSedan(dagar) {
+    if (dagar < 60) return dagar + ' dagar';
+    if (dagar < 365) return Math.floor(dagar / 30) + ' månader';
+    const ar = Math.floor(dagar / 365);
+    return ar === 1 ? '1 år' : ar + ' år';
+  }
+  // Distrikt utan commits: står still (45 dagar) eller övergivet (1 år)
+  function stillaText(dagar) {
+    if (dagar == null || dagar <= 45) return '';
+    return (dagar >= 365 ? 'övergivet' : 'står still') + ', ingen commit på ' + langeSedan(dagar);
+  }
+
   function nar(iso) {
     const t = Date.parse(iso);
     if (isNaN(t)) return '–';
@@ -108,7 +121,7 @@
       if (r.prOppna) h.push({ typ: 'bygge', namn: r.namn, text: 'Byggstart i ' + r.namn + ': ' + r.prOppna + ' öppen PR' });
       if (r.release) h.push({ typ: 'torn', namn: r.namn, text: 'Nytt landmärke i ' + r.namn + ': ' + r.release });
       if ((r.issues || 0) >= 3) h.push({ typ: 'trafik', namn: r.namn, text: 'Trafikstockning i ' + r.namn + ': ' + r.issues + ' öppna issues' });
-      if (d != null && d > 45) h.push({ typ: 'gammal', namn: r.namn, text: r.namn + ' växer igen, ingen commit på ' + d + ' dagar' });
+      if (d != null && d > 45) h.push({ typ: 'gammal', namn: r.namn, text: r.namn + (d >= 365 ? ' är ' : ' ') + stillaText(d) });
     });
     const snabbast = [...lage.repon].sort((a, b) => (b.veckans || 0) - (a.veckans || 0))[0];
     if (snabbast && snabbast.veckans) h.push({ typ: 'vaxer', namn: snabbast.namn, text: snabbast.namn + ' växer snabbast: ' + snabbast.veckans + ' commits i veckan' });
@@ -164,7 +177,7 @@
       '<div><dt>' + esc(dt) + '</dt><dd' + (cls ? ' class="' + cls + '"' : '') + '>' + esc(dd) + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</dd></div>').join('');
     const rad = ['Senaste commit ' + nar(r.senast)];
     if (r.release) rad.push('landmärke ' + r.release);
-    if (info.gammal) rad.push('distriktet växer igen');
+    if (info.gammal) { const t = stillaText(dagarSedan(r.senast)); if (t) rad.push('distriktet ' + (t.startsWith('över') ? 'är ' : '') + t); }
     $('kort-status').textContent = rad.join(' · ');
     brand(r);
     $('kort-repo').hidden = !r.url;

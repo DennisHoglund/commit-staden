@@ -8,7 +8,7 @@
 | **Prioritet** | Medel |
 | **Typ** | 🤖 Automatiserad |
 | **Krav** | [SPEC.md avsnitt 5](../../SPEC.md) |
-| **Playwright** | [`tests/github.spec.js`](../../tests/github.spec.js#L101) – *logga ut tar bort token och visar demostaden* |
+| **Playwright** | [`tests/github.spec.js`](../../tests/github.spec.js#L106) – *logga ut tar bort token och visar demostaden* |
 
 ## Förutsättningar
 

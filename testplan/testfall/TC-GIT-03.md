@@ -8,7 +8,7 @@
 | **Prioritet** | Hög |
 | **Typ** | 🤖 Automatiserad |
 | **Krav** | [SPEC.md avsnitt 5](../../SPEC.md) |
-| **Playwright** | [`tests/github.spec.js`](../../tests/github.spec.js#L64) – *Vad brinner? visar workflow, steg, fel och länk till körningen* |
+| **Playwright** | [`tests/github.spec.js`](../../tests/github.spec.js#L69) – *Vad brinner? visar workflow, steg, fel och länk till körningen* |
 
 ## Förutsättningar
 

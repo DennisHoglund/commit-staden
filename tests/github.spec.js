@@ -45,6 +45,11 @@ test.describe('GitHub', () => {
     await expect(page.locator('#kort-status')).toContainText('landmärke v1.2');
     await expect(page.locator('#kort-repo')).toHaveAttribute('href', 'https://github.com/testdennis/alfa');
     await expect(page.locator('#kort-brand')).toBeHidden();
+
+    // Gamma har inte haft en commit på 12 år: övergivet, inte "växer"
+    await page.getByRole('button', { name: 'gamma', exact: true }).focus();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#kort-status')).toContainText('distriktet är övergivet, ingen commit på 12 år');
   });
 
   test('fel token ger tydligt fel och sparas inte', { annotation: { type: 'testfall', description: 'TC-GIT-02' } }, async ({ staden: page, api }) => {

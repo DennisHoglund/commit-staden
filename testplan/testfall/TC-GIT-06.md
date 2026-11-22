@@ -8,7 +8,7 @@
 | **Prioritet** | Medel |
 | **Typ** | 🤖 Automatiserad |
 | **Krav** | [SPEC.md avsnitt 5](../../SPEC.md) |
-| **Playwright** | [`tests/github.spec.js`](../../tests/github.spec.js#L120) – *utgången token vid start visar demon och ber om ny token* |
+| **Playwright** | [`tests/github.spec.js`](../../tests/github.spec.js#L125) – *utgången token vid start visar demon och ber om ny token* |
 
 ## Förutsättningar
 

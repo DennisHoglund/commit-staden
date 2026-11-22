@@ -8,7 +8,7 @@
 | **Prioritet** | Hög |
 | **Typ** | 🤖 Automatiserad |
 | **Krav** | [SPEC.md avsnitt 5](../../SPEC.md) |
-| **Playwright** | [`tests/github.spec.js`](../../tests/github.spec.js#L50) – *fel token ger tydligt fel och sparas inte* |
+| **Playwright** | [`tests/github.spec.js`](../../tests/github.spec.js#L55) – *fel token ger tydligt fel och sparas inte* |
 
 ## Förutsättningar
 

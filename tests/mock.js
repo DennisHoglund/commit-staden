@@ -12,12 +12,12 @@ function testdata() {
     repos: [
       { name: 'alfa', language: 'JavaScript', open_issues_count: 4, archived: false, fork: false, private: false, default_branch: 'main', pushed_at: dagar(0) },
       { name: 'beta', language: 'C#', open_issues_count: 0, archived: false, fork: false, private: true, default_branch: 'main', pushed_at: dagar(1) },
-      { name: 'gamma', language: 'HTML', open_issues_count: 0, archived: false, fork: false, private: false, default_branch: 'master', pushed_at: dagar(100) },
+      { name: 'gamma', language: 'HTML', open_issues_count: 0, archived: false, fork: false, private: false, default_branch: 'master', pushed_at: dagar(4400) },
       { name: 'en-fork', language: 'Go', open_issues_count: 0, archived: false, fork: true, private: false, default_branch: 'main', pushed_at: dagar(2) }
     ].map((r) => ({ ...r, full_name: 'testdennis/' + r.name, html_url: 'https://github.com/testdennis/' + r.name })),
     commits: { alfa: 120, beta: 45, gamma: 12 },
     veckans: { alfa: 9, beta: 3, gamma: 0 },
-    senast: { alfa: dagar(0), beta: dagar(1), gamma: dagar(100) },
+    senast: { alfa: dagar(0), beta: dagar(1), gamma: dagar(4400) }, // gamma: ca 12 år sedan
     sprak: { alfa: { JavaScript: 70000, CSS: 7000 }, beta: { 'C#': 52500 }, gamma: { HTML: 3500 } },
     pulls: { alfa: 1, beta: 0, gamma: 0 },
     release: { alfa: 'v1.2' },

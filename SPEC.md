@@ -3,7 +3,7 @@
 ## 1. Syfte
 En PWA för iPhone där Dennis GitHub-repon blir en levande isometrisk stad i stadsbyggarstil.
 Varje repo är ett distrikt, och det som händer i repot syns i staden: commits bygger hus, rött bygge ger brand,
-öppna PR blir byggarbetsplatser, issues blir trafik och repon som står still växer igen.
+öppna PR blir byggarbetsplatser, issues blir trafik och repon som står still blir grå och fulla av träd.
 
 ## 2. Stack
 - Ren HTML/CSS/JS utan byggsteg. Moduler som IIFE på `window` (`CsStad`, `CsGithub`, `CsDemo`).
@@ -41,7 +41,7 @@ Varje repo är ett distrikt, och det som händer i repot syns i staden: commits 
 | Byggarbetsplats med kran | öppen PR |
 | Brand med rök | senaste bygget på main är rött |
 | Bilar | trafik, fler vid öppna issues (stockning från 3). Små 3D-bilar med tak, strålkastare fram och bakljus bak, ljuskägla på natten. Högertrafik i två filer, bilar i samma fil kör lika fort med jämnt avstånd |
-| Grått distrikt med träd | ingen commit på 45 dagar (växer igen) |
+| Grått distrikt med träd | ingen commit på 45 dagar: "står still"; ingen commit på 1 år: "övergivet". Tiden visas i dagar, månader eller år |
 | Invånare (HUD) | rader kod totalt |
 | Budget (HUD) | commits i veckan |
 | Nöjdhet (HUD) | andel gröna byggen |

@@ -86,7 +86,7 @@ test.describe('Staden', () => {
 
     await page.getByRole('button', { name: 'appspec', exact: true }).focus();
     await page.keyboard.press('Enter');
-    await expect(page.locator('#kort-status')).toContainText('växer igen');
+    await expect(page.locator('#kort-status')).toContainText('distriktet står still, ingen commit på 2 månader');
     await expect(page.locator('#kort-status')).toContainText('Senaste commit för');
   });
 
