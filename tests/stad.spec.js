@@ -78,7 +78,7 @@ test.describe('Staden', () => {
     // Fler issues ger fler bilar (trafik)
     expect(l.bilar).toBeGreaterThan(l.distrikt.length);
 
-    await page.getByRole('button', { name: 'appspec' }).focus();
+    await page.getByRole('button', { name: 'appspec', exact: true }).focus();
     await page.keyboard.press('Enter');
     await expect(page.locator('#kort-status')).toContainText('växer igen');
     await expect(page.locator('#kort-status')).toContainText('Senaste commit för');
@@ -103,7 +103,7 @@ test.describe('Staden', () => {
   });
 
   test('distrikten går att öppna med tangentbord och skärmläsare', { annotation: { type: 'testfall', description: 'TC-STA-07' } }, async ({ staden: page }) => {
-    await page.getByRole('button', { name: 'virkesfynd' }).focus();
+    await page.getByRole('button', { name: 'virkesfynd', exact: true }).focus();
     await page.keyboard.press('Enter');
     await expect(page.getByRole('dialog', { name: 'virkesfynd' })).toBeVisible();
     await page.keyboard.press('Escape');

@@ -38,7 +38,7 @@ test.describe('GitHub', () => {
     await bild(page, 'Min stad');
 
     // Alfa: commits från Link-huvudet, issues utan PR, release
-    await page.getByRole('button', { name: 'alfa' }).focus();
+    await page.getByRole('button', { name: 'alfa', exact: true }).focus();
     await page.keyboard.press('Enter');
     await expect(page.locator('#kort-siffror')).toContainText('120 commits');
     await expect(page.locator('#kort-siffror')).toContainText('trafikstockning');
