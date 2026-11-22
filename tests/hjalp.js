@@ -1,0 +1,30 @@
+// Gemensamma hjälpfunktioner och fixturer för testerna.
+const base = require('@playwright/test');
+const { mocka } = require('./mock');
+
+const test = base.test.extend({
+  // Mockar allt externt innan varje test
+  api: async ({ page }, use) => {
+    const api = await mocka(page);
+    await use(api);
+  },
+
+  // Startsidan med demostaden färdigritad
+  staden: async ({ page, api }, use) => {
+    await page.goto('./');
+    await page.waitForFunction(() => window.CsStad && window.CsStad.klar);
+    await base.expect(page.locator('#hud-invanare')).not.toHaveText('–');
+    await use(page);
+  }
+});
+
+// Bifogar en skärmdump till rapporten
+async function bild(page, namn) {
+  await page.waitForTimeout(250); // låt animationer landa
+  await test.info().attach(namn, { body: await page.screenshot(), contentType: 'image/png' });
+}
+
+// Läser stadens läge (distrikt, bränder, kamera m.m.)
+const lage = (page) => page.evaluate(() => window.CsStad.lage());
+
+module.exports = { test, expect: base.expect, bild, lage };

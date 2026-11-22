@@ -1,0 +1,15 @@
+{
+  "name": "commit-staden",
+  "private": true,
+  "description": "Commit-staden – dina GitHub-repon som en levande stad (PWA)",
+  "scripts": {
+    "test": "node tests/kontrollera-testplan.js && playwright test",
+    "testplan": "node tests/kontrollera-testplan.js",
+    "test:ui": "playwright test --ui",
+    "rapport": "npx http-server rapport -p 9324 -o"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "http-server": "^14.1.1"
+  }
+}

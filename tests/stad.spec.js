@@ -1,0 +1,109 @@
+const { test, expect, bild, lage } = require('./hjalp');
+
+test.describe('Staden', () => {
+  test('demostaden ritas med ett distrikt per repo', { annotation: { type: 'testfall', description: 'TC-STA-01' } }, async ({ staden: page }) => {
+    const antal = await page.evaluate(() => window.CsDemo.repon.length);
+    await expect(page.locator('#distrikt-lista button')).toHaveCount(antal);
+    expect((await lage(page)).distrikt).toHaveLength(antal);
+    await expect(page.locator('#demo-badge')).toBeVisible();
+
+    // Canvasen ska innehålla mer än bakgrundsfärg
+    const farger = await page.evaluate(() => {
+      const c = document.getElementById('stad');
+      const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+      const set = new Set();
+      for (let i = 0; i < d.length; i += 4 * 97) set.add(d[i] + ',' + d[i + 1] + ',' + d[i + 2]);
+      return set.size;
+    });
+    expect(farger).toBeGreaterThan(10);
+    await bild(page, 'Staden');
+  });
+
+  test('HUD:en visar invånare, budget, nöjdhet och bränder', { annotation: { type: 'testfall', description: 'TC-STA-02' } }, async ({ staden: page }) => {
+    const v = await page.evaluate(() => {
+      const r = window.CsDemo.repon;
+      const sum = (f) => r.reduce((s, x) => s + (x[f] || 0), 0);
+      return {
+        invanare: sum('rader').toLocaleString('sv-SE'),
+        budget: sum('veckans').toLocaleString('sv-SE'),
+        nojdhet: Math.round(r.reduce((s, x) => s + x.ciAndel, 0) / r.length * 100) + ' %',
+        brander: String(r.filter((x) => x.ci === 'fel').length)
+      };
+    });
+    await expect(page.locator('#hud-invanare')).toHaveText(v.invanare);
+    await expect(page.locator('#hud-budget')).toHaveText(v.budget);
+    await expect(page.locator('#hud-nojdhet')).toHaveText(v.nojdhet);
+    await expect(page.locator('#hud-brander')).toHaveText(v.brander);
+    await expect(page.locator('#hud-brander')).toHaveClass(/varning/);
+  });
+
+  test('tryck på ett distrikt öppnar distriktskortet', { annotation: { type: 'testfall', description: 'TC-STA-03' } }, async ({ staden: page }) => {
+    const p = await page.evaluate(() => window.CsStad.skarmpunkt('jaktvind'));
+    await page.touchscreen.tap(p.x, p.y);
+    await expect(page.locator('#kort')).toBeVisible();
+    await expect(page.locator('#kort-titel')).toHaveText('jaktvind');
+    await expect(page.locator('#kort-zon')).toContainText('Bostadsområde');
+    await expect(page.locator('#kort-siffror')).toContainText('Invånare');
+    expect((await lage(page)).vald).toBe('jaktvind');
+    // Distriktet flyttas fram så att det syns ovanför kortet
+    const efter = await page.evaluate(() => window.CsStad.skarmpunkt('jaktvind'));
+    const kortTopp = (await page.locator('#kort').boundingBox()).y;
+    expect(efter.y).toBeLessThan(kortTopp);
+    await bild(page, 'Distriktskort');
+
+    await page.locator('#btn-stang').click();
+    await expect(page.locator('#kort')).toBeHidden();
+    expect((await lage(page)).vald).toBeNull();
+  });
+
+  test('rött bygge syns som brand och i nyhetsraden', { annotation: { type: 'testfall', description: 'TC-STA-04' } }, async ({ staden: page }) => {
+    expect((await lage(page)).brander).toEqual(['elkoll']);
+    await expect(page.locator('#ticker')).toHaveAttribute('data-typ', 'brand');
+    await expect(page.locator('#ticker-text')).toContainText('Brand i elkoll');
+    await page.locator('#ticker').click();
+    await expect(page.locator('#kort-titel')).toHaveText('elkoll');
+    await expect(page.locator('#kort-siffror')).toContainText('Rött');
+    await expect(page.locator('#kort-siffror')).toContainText('huset brinner');
+  });
+
+  test('öppen PR, release och gamla repon syns i staden', { annotation: { type: 'testfall', description: 'TC-STA-05' } }, async ({ staden: page }) => {
+    const l = await lage(page);
+    expect(l.byggen).toEqual(['kaloriappen']);
+    expect(l.torn.sort()).toEqual(['svampkartan', 'tillsatskoll']);
+    expect(l.distrikt.find((d) => d.namn === 'appspec').gammal).toBe(true);
+    expect(l.distrikt.find((d) => d.namn === 'jaktvind').gammal).toBe(false);
+    // Fler issues ger fler bilar (trafik)
+    expect(l.bilar).toBeGreaterThan(l.distrikt.length);
+
+    await page.getByRole('button', { name: 'appspec' }).focus();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#kort-status')).toContainText('växer igen');
+    await expect(page.locator('#kort-status')).toContainText('Senaste commit för');
+  });
+
+  test('dra för att flytta staden och Centrera för att återställa', { annotation: { type: 'testfall', description: 'TC-STA-06' } }, async ({ staden: page }) => {
+    const fore = (await lage(page)).kamera;
+    await page.mouse.move(200, 420);
+    await page.mouse.down();
+    await page.mouse.move(150, 380, { steps: 5 });
+    await page.mouse.move(120, 360, { steps: 5 });
+    await page.mouse.up();
+    const efter = (await lage(page)).kamera;
+    expect(Math.round(efter.x)).toBe(Math.round(fore.x - 80));
+    expect(Math.round(efter.y)).toBe(Math.round(fore.y - 60));
+    await expect(page.locator('#kort')).toBeHidden();
+
+    await page.locator('#btn-centrera').click();
+    const tillbaka = (await lage(page)).kamera;
+    expect(tillbaka.x).toBeCloseTo(fore.x, 1);
+    expect(tillbaka.y).toBeCloseTo(fore.y, 1);
+  });
+
+  test('distrikten går att öppna med tangentbord och skärmläsare', { annotation: { type: 'testfall', description: 'TC-STA-07' } }, async ({ staden: page }) => {
+    await page.getByRole('button', { name: 'virkesfynd' }).focus();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('dialog', { name: 'virkesfynd' })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#kort')).toBeHidden();
+  });
+});
