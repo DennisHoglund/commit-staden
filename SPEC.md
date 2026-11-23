@@ -23,7 +23,8 @@ Varje repo är ett distrikt, och det som händer i repot syns i staden: commits 
 - **HUD** överst: Invånare, Budget, Nöjdhet, Bränder, datum och antal distrikt. Knappen uppe till höger visar **Demo** eller ditt GitHub-namn och öppnar GitHub-kortet.
 - **Staden** fyller skärmen: Centrera visar hela höjden och låter kanterna gå utanför på bredden (högst 1,5 gånger skärmbredden). Dra för att flytta, nyp (två fingrar) eller scrolla för att zooma.
 - **Nyhetsrad** ovanför verktygen visar händelser, en i taget var 6:e sekund. Tryck öppnar distriktet.
-- **Verktyg**: Centrera, GitHub och Tema.
+- **Verktyg**: Centrera, Sök, GitHub och Tema (ikon över text).
+- **Sök (taxi)**: kort med sökfält och upp till 8 träffar (namn, zon, språk, status). Tryck på en träff eller Enter för första träffen: en gul taxi kör från bortre sidan av staden längs vägen till distriktet, kameran följer och zoomar in, och vid framkomsten öppnas distriktskortet. Utan animationer (`prefers-reduced-motion`) öppnas kortet direkt.
 - **GitHub-kort**: anslut med token (med instruktion för att skapa en), eller Uppdatera/Logga ut när man är ansluten.
 - **Vad brinner?** i distriktskortet när bygget är rött: workflow, jobb och steg som föll, felmeddelanden (annoteringar), commit, vem och när, samt länk till körningen.
 - **Toast** under HUD:en för kvitton och fel.
@@ -40,6 +41,8 @@ Varje repo är ett distrikt, och det som händer i repot syns i staden: commits 
 | Torn med blinkande topp | release finns |
 | Byggarbetsplats med kran | öppen PR |
 | Brand med rök | senaste bygget på main är rött |
+| Brandbil med blåljus och vattenstråle | parkerad på vägen vid varje brinnande distrikt |
+| Väder | 0 bränder = klart (stjärnor och måne på natten, sol på dagen), 1 brand = mulet med duggregn, 2 eller fler = åska med regn och blixt var 5:e sekund. Visas också i HUD:en (Klart, Mulet, Åska) |
 | Bilar | trafik, fler vid öppna issues (stockning från 3). Små 3D-bilar med tak, strålkastare fram och bakljus bak, ljuskägla på natten. Högertrafik i två filer, bilar i samma fil kör lika fort med jämnt avstånd |
 | Grått distrikt med träd | ingen commit på 45 dagar: "står still"; ingen commit på 1 år: "övergivet". Tiden visas i dagar, månader eller år |
 | Invånare (HUD) | rader kod totalt |

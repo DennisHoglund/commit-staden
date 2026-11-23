@@ -8,7 +8,7 @@
 | **Prioritet** | Medel |
 | **Typ** | 🤖 Automatiserad |
 | **Krav** | [SPEC.md](../../SPEC.md) |
-| **Playwright** | [`tests/stad.spec.js`](../../tests/stad.spec.js#L77) – *öppen PR, release och gamla repon syns i staden* |
+| **Playwright** | [`tests/stad.spec.js`](../../tests/stad.spec.js#L79) – *öppen PR, release och gamla repon syns i staden* |
 
 ## Förutsättningar
 

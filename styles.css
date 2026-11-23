@@ -203,16 +203,19 @@ button:focus-visible { outline: none; box-shadow: var(--fokus); }
 }
 .verktyg-knapp {
   flex: 1 1 0;
+  min-width: 0;
   min-height: 52px;
   border: 0;
   border-radius: 20px;
   background: transparent;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  font-size: 14px;
+  gap: 2px;
+  font-size: 12px;
   font-weight: 500;
+  white-space: nowrap;
 }
 .verktyg-knapp:active { background: var(--accent-svag); color: var(--accent); }
 
@@ -358,3 +361,40 @@ button:focus-visible { outline: none; box-shadow: var(--fokus); }
 }
 .brand-commit { margin: 0; font-size: 13px; color: var(--text-2); }
 .brand-commit code { font: 12px "Geist Mono", ui-monospace, monospace; color: var(--text); }
+
+/* ---------- Sök (taxi) ---------- */
+#form-sok input {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 14px;
+  border: 1px solid var(--yta-kant);
+  background: var(--yta);
+  color: var(--text);
+  padding: 0 14px;
+  font: 16px "Geist Mono", ui-monospace, monospace;
+  -webkit-appearance: none;
+  appearance: none;
+}
+#form-sok input:focus { outline: none; box-shadow: var(--fokus); }
+.sok-lista { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.sok-lista button {
+  width: 100%;
+  min-height: 52px;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 14px;
+  text-align: left;
+}
+.sok-lista button:first-child, .sok-lista li:first-child button { background: var(--accent-svag); }
+.sok-lista button:focus-visible { outline: none; box-shadow: var(--fokus); }
+.sok-prick { flex: none; width: 8px; height: 8px; border-radius: 4px; background: var(--text-2); }
+.sok-prick.ok { background: var(--ok); }
+.sok-prick.fel { background: var(--varning); }
+.sok-text { display: flex; flex-direction: column; flex-grow: 1; min-width: 0; }
+.sok-namn { font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sok-sub { font-size: 12px; color: var(--text-2); }
+.sok-taxi { font: 500 12px "Geist Mono", ui-monospace, monospace; color: var(--bygge); white-space: nowrap; }

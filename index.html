@@ -58,6 +58,10 @@
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4"/><circle cx="12" cy="12" r="2.5"/></svg>
       Centrera
     </button>
+    <button class="verktyg-knapp" id="btn-sok" type="button">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></svg>
+      Sök
+    </button>
     <button class="verktyg-knapp" id="btn-github" type="button">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="9" r="2.5"/><path d="M6 8.5v7M18 11.5c0 3-3 4-9.5 5.5"/></svg>
       GitHub
@@ -89,6 +93,25 @@
     <dl id="kort-siffror" class="kort-siffror"></dl>
     <p id="kort-status" class="kort-status"></p>
     <a id="kort-repo" class="knapp" href="#" target="_blank" rel="noopener" hidden>Öppna repot på GitHub</a>
+  </section>
+
+  <section id="sok-kort" class="kort" role="dialog" aria-labelledby="sok-titel" hidden>
+    <div class="kort-handtag" aria-hidden="true"></div>
+    <div class="kort-topp">
+      <div>
+        <p class="kort-zon">Taxi</p>
+        <h2 id="sok-titel">Sök i staden</h2>
+      </div>
+      <button class="rund-knapp" id="btn-sok-stang" type="button" aria-label="Stäng">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <form id="form-sok" role="search">
+      <label for="sok" class="sr-only">Sök repo</label>
+      <input id="sok" type="search" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Repo, t.ex. elkoll" enterkeyhint="go">
+    </form>
+    <ul id="sok-lista" class="sok-lista" aria-label="Träffar"></ul>
+    <p id="sok-tom" class="kort-status" hidden>Inga repon matchar.</p>
   </section>
 
   <section id="gh-kort" class="kort" role="dialog" aria-labelledby="gh-titel" hidden>

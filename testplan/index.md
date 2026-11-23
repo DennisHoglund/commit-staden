@@ -5,8 +5,8 @@ Automatiserade testfall körs dessutom av Playwright vid varje commit och är ko
 
 | | |
 |---|---|
-| **Testfall** | 21 |
-| **Automatiserade** | 17 (körs på iPhone/WebKit och Android/Chromium) |
+| **Testfall** | 24 |
+| **Automatiserade** | 20 (körs på iPhone/WebKit och Android/Chromium) |
 | **Manuella** | 4 (kräver riktig iPhone, fingrar, skärmläsare eller riktigt GitHub-konto) |
 | **Senaste testrapport** | [dennishoglund.github.io/commit-staden/rapport/](https://dennishoglund.github.io/commit-staden/rapport/) |
 | **Krav** | [SPEC.md](../SPEC.md) |
@@ -37,6 +37,19 @@ Automatiserade testfall körs dessutom av Playwright vid varje commit och är ko
 | [TC-GIT-05](testfall/TC-GIT-05.md) | [Logga ut tar bort token och visar demostaden](testfall/TC-GIT-05.md) | Medel | 🤖 |
 | [TC-GIT-06](testfall/TC-GIT-06.md) | [Utgången token vid start visar demon och ber om ny token](testfall/TC-GIT-06.md) | Medel | 🤖 |
 | [TC-GIT-07](testfall/TC-GIT-07.md) | [Skapa token på iPhone och anslut](testfall/TC-GIT-07.md) | Hög | 🖐️ |
+
+## Väder och utryckning
+
+| ID | Testfall | Prio | Typ |
+|---|---|---|---|
+| [TC-VAD-01](testfall/TC-VAD-01.md) | [Vädret visar hur byggena mår](testfall/TC-VAD-01.md) | Medel | 🤖 |
+
+## Sök och taxi
+
+| ID | Testfall | Prio | Typ |
+|---|---|---|---|
+| [TC-TAX-01](testfall/TC-TAX-01.md) | [Sök och åk taxi till ett distrikt](testfall/TC-TAX-01.md) | Hög | 🤖 |
+| [TC-TAX-02](testfall/TC-TAX-02.md) | [Sök utan träff säger det, och Enter åker till första träffen](testfall/TC-TAX-02.md) | Låg | 🤖 |
 
 ## Tema och design
 

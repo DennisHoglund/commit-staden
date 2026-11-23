@@ -63,8 +63,10 @@ test.describe('Staden', () => {
 
   test('rött bygge syns som brand och i nyhetsraden', { annotation: { type: 'testfall', description: 'TC-STA-04' } }, async ({ staden: page }) => {
     expect((await lage(page)).brander).toEqual(['elkoll']);
+    // Brandkåren står vid huset som brinner
+    expect((await lage(page)).brandbilar).toEqual(['elkoll']);
     await expect(page.locator('#ticker')).toHaveAttribute('data-typ', 'brand');
-    await expect(page.locator('#ticker-text')).toContainText('Brand i elkoll');
+    await expect(page.locator('#ticker-text')).toContainText('Brand i elkoll! Brandkåren är på plats');
     await page.locator('#ticker').click();
     await expect(page.locator('#kort-titel')).toHaveText('elkoll');
     await expect(page.locator('#kort-siffror')).toContainText('Rött');

@@ -18,8 +18,8 @@
 
 | # | Gör så här | Förväntat resultat |
 |---|---|---|
-| 1 | Leta upp distriktet **elkoll** | Ett hus brinner med flimrande lågor och rök |
-| 2 | Titta på nyhetsraden ovanför verktygen | "Brand i elkoll! Bygget på main är rött" med orange prick |
+| 1 | Leta upp distriktet **elkoll** | Ett hus brinner med flimrande lågor och rök, och en brandbil med blåljus sprutar vatten på det |
+| 2 | Titta på nyhetsraden ovanför verktygen | "Brand i elkoll! Brandkåren är på plats" med orange prick |
 | 3 | Tryck på nyhetsraden | Distriktskortet för elkoll öppnas och Bygget visar **Rött** |
 
 ## Resultat

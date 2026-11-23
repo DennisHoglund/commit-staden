@@ -136,7 +136,14 @@
       lista.forEach((b, n) => { b.start = (bas + n * len / lista.length) % len; });
     });
 
-    return { storlek, distrikt, bilar };
+    // Brandbilar: en per brinnande distrikt, parkerad på vägen ovanför huset som brinner
+    const brandbilar = [];
+    distrikt.forEach((d) => {
+      const t = d.hus.find((x) => x.brand);
+      if (t) brandbilar.push({ namn: d.namn, i: t.i, j: d.j0 - 1, langsI: true, rikt: 1, typ: 'brandbil', parkerad: true, brand: t });
+    });
+
+    return { storlek, distrikt, bilar, brandbilar };
   }
 
   // ---------- Rendering ----------
@@ -249,6 +256,7 @@
     ['#7FFFE0', '#4FCDB2', '#329A85'],
     ['#FFC25A', '#D69A36', '#A87520']
   ];
+  const ROD = ['#FF5A4A', '#D23C2E', '#A12A20'];
   function lada3(ctx, p, a, b, z0, z1, f) {
     const pt = (sa, sb, z) => [p.x + sa * a.x + sb * b.x, p.y + sa * a.y + sb * b.y - z];
     const sA = a.y >= 0 ? 1 : -1, sB = b.y >= 0 ? 1 : -1;
@@ -260,25 +268,58 @@
   function bil(ctx, i, j, b0) {
     const ui = { x: TW / 2, y: TH / 2 }, uj = { x: -TW / 2, y: TH / 2 };
     const ax = b0.langsI ? ui : uj, vx = b0.langsI ? uj : ui;
-    const a = { x: ax.x * 0.3 * b0.rikt, y: ax.y * 0.3 * b0.rikt };
+    const L = b0.typ === 'brandbil' ? 0.42 : 0.3;
+    const a = { x: ax.x * L * b0.rikt, y: ax.y * L * b0.rikt };
     const b = { x: vx.x * 0.11, y: vx.y * 0.11 };
     const p = iso(i, j);
     const natt = S.tema === 'dark';
     // Skugga
     poly(ctx, [p.x - a.x - b.x, p.y - a.y - b.y + 1, p.x + a.x - b.x, p.y + a.y - b.y + 1, p.x + a.x + b.x, p.y + a.y + b.y + 1, p.x - a.x + b.x, p.y - a.y + b.y + 1], natt ? 'rgba(0,0,0,.35)' : 'rgba(15,42,24,.18)');
     // Ljuskägla framför bilen på natten
-    if (natt) {
+    if (natt && !b0.parkerad) {
       ctx.globalAlpha = 0.16;
       poly(ctx, [p.x + a.x - b.x * 0.8, p.y + a.y - b.y * 0.8, p.x + a.x * 3.2 - b.x * 1.8, p.y + a.y * 3.2 - b.y * 1.8,
         p.x + a.x * 3.2 + b.x * 1.8, p.y + a.y * 3.2 + b.y * 1.8, p.x + a.x + b.x * 0.8, p.y + a.y + b.y * 0.8], '#FFE9A0');
       ctx.globalAlpha = 1;
     }
-    const f = BILFARG[b0.farg % BILFARG.length];
-    const pt = lada3(ctx, p, a, b, 0.6, 4.2, f);
-    // Tak med mörka rutor, lite bakåt
-    const pc = { x: p.x - a.x * 0.15, y: p.y - a.y * 0.15 };
+    const f = b0.typ === 'brandbil' ? ROD : b0.typ === 'taxi' ? BILFARG[2] : BILFARG[b0.farg % BILFARG.length];
     const glas = natt ? '#14201A' : '#3A4A42';
-    lada3(ctx, pc, { x: a.x * 0.55, y: a.y * 0.55 }, { x: b.x * 0.85, y: b.y * 0.85 }, 4.2, 7, [f[0], glas, glas]);
+    const pt = lada3(ctx, p, a, b, 0.6, b0.typ === 'brandbil' ? 4.6 : 4.2, f);
+    if (b0.typ === 'brandbil') {
+      // Hytt fram, stege på taket och blinkande blåljus
+      const pc = { x: p.x + a.x * 0.6, y: p.y + a.y * 0.6 };
+      lada3(ctx, pc, { x: a.x * 0.32, y: a.y * 0.32 }, { x: b.x * 0.9, y: b.y * 0.9 }, 4.6, 8, [f[0], glas, glas]);
+      for (let k = 0; k < 5; k++) {
+        const t = -0.8 + k * 0.28;
+        const q = { x: p.x + a.x * t, y: p.y + a.y * t - 5.6 };
+        poly(ctx, [q.x - b.x * 0.5, q.y - b.y * 0.5, q.x + b.x * 0.5, q.y + b.y * 0.5, q.x + b.x * 0.5, q.y + b.y * 0.5 - 0.7, q.x - b.x * 0.5, q.y - b.y * 0.5 - 0.7], '#E6ECE8');
+      }
+      const lp = { x: p.x + a.x * 0.6, y: p.y + a.y * 0.6 - 8.8 };
+      const fas = S.anim ? Math.floor(S.tid / 250) % 2 : 0;
+      ctx.fillStyle = fas ? '#1C3A8A' : '#3D7BFF';
+      ctx.fillRect(lp.x - 3, lp.y - 1.6, 2.6, 1.8);
+      ctx.fillStyle = fas ? '#3D7BFF' : '#1C3A8A';
+      ctx.fillRect(lp.x + 0.4, lp.y - 1.6, 2.6, 1.8);
+      if (natt) {
+        ctx.globalAlpha = 0.2;
+        ctx.fillStyle = '#3D7BFF';
+        ctx.beginPath(); ctx.arc(lp.x + (fas ? 1.7 : -1.7), lp.y, 9, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+    } else {
+      // Tak med mörka rutor, lite bakåt
+      const pc = { x: p.x - a.x * 0.15, y: p.y - a.y * 0.15 };
+      lada3(ctx, pc, { x: a.x * 0.55, y: a.y * 0.55 }, { x: b.x * 0.85, y: b.y * 0.85 }, 4.2, 7, [f[0], glas, glas]);
+      if (b0.typ === 'taxi') {
+        const q = { x: pc.x, y: pc.y - 7 };
+        poly(ctx, [q.x - 2.6, q.y, q.x, q.y + 1.3, q.x + 2.6, q.y, q.x + 2.6, q.y - 2.4, q.x, q.y - 1.1, q.x - 2.6, q.y - 2.4], '#FFF3C4');
+        ctx.font = '700 2.2px Geist, system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#2B2313';
+        ctx.fillText('TAXI', q.x, q.y - 0.6);
+      }
+    }
     // Strålkastare om fronten syns, annars bakljus
     const fram = a.y >= 0;
     const sida = fram ? 1 : -1;
@@ -296,6 +337,7 @@
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = P.bg;
     ctx.fillRect(0, 0, S.canvas.width, S.canvas.height);
+    himmel(ctx);
     const s = S.dpr * S.kam.s;
     ctx.setTransform(s, 0, 0, s, S.dpr * S.kam.x, S.dpr * S.kam.y);
 
@@ -337,6 +379,20 @@
       const j = b.langsI ? b.fast : pos;
       objekt.push({ z: i + j + 0.01, bil: b, i, j });
     });
+    stad.brandbilar.forEach((b) => objekt.push({ z: b.i + b.j + 0.01, bil: b, i: b.i, j: b.j }));
+    const taxi = taxiLage();
+    if (taxi) {
+      // Streckad rutt fram till målet
+      const fil = taxi.rikt > 0 ? 0.24 : -0.24;
+      const a0 = iso(taxi.i, taxi.j + fil), a1 = iso(S.taxi.slut, taxi.j + fil);
+      ctx.strokeStyle = '#FFC25A';
+      ctx.lineWidth = 1.6;
+      ctx.setLineDash([4, 4]);
+      ctx.lineDashOffset = S.anim ? -S.tid / 60 : 0;
+      ctx.beginPath(); ctx.moveTo(a0.x, a0.y); ctx.lineTo(a1.x, a1.y); ctx.stroke();
+      ctx.setLineDash([]);
+      objekt.push({ z: taxi.i + taxi.j + 0.01, bil: { langsI: true, rikt: taxi.rikt, typ: 'taxi', farg: 2 }, i: taxi.i, j: taxi.j });
+    }
     objekt.sort((a, b) => a.z - b.z);
 
     for (const o of objekt) {
@@ -360,6 +416,23 @@
       ctx.globalAlpha = 1;
     }
 
+    // Vattenstråle från brandbilen till branden
+    stad.brandbilar.forEach((b) => {
+      const p0 = iso(b.i, b.j + 0.24), p1 = iso(b.brand.i, b.brand.j);
+      const y0 = p0.y - 9, y1 = p1.y - b.brand.h - 4;
+      ctx.strokeStyle = '#9AD8FF';
+      ctx.lineWidth = 1.8;
+      ctx.globalAlpha = 0.9;
+      ctx.setLineDash([4, 3]);
+      ctx.lineDashOffset = S.anim ? -S.tid / 40 : 0;
+      ctx.beginPath();
+      ctx.moveTo(p0.x, y0);
+      ctx.quadraticCurveTo((p0.x + p1.x) / 2, Math.min(y0, y1) - 34, p1.x, y1);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.globalAlpha = 1;
+    });
+
     // Namnskyltar ovanför varje distrikt
     ctx.font = '600 9px Geist, -apple-system, system-ui, sans-serif';
     ctx.textAlign = 'center';
@@ -379,6 +452,140 @@
       ctx.fillStyle = P.etikettText;
       ctx.fillText(d.namn, p.x, y + 0.5);
     });
+
+    // Följ taxin med kameran
+    if (taxi && !S.taxi.framme) {
+      const p = iso(taxi.i, taxi.j);
+      S.kam.s += (Math.max(1.7, S.kam.s) - S.kam.s) * 0.06; // zooma in lite under resan
+      S.kam.x += (S.w / 2 - p.x * S.kam.s - S.kam.x) * 0.15;
+      S.kam.y += (S.h * 0.5 - p.y * S.kam.s - S.kam.y) * 0.15;
+    }
+
+    vader(ctx);
+  }
+
+  // ---------- Väder: himlen visar hur byggena mår ----------
+  // 0 bränder = klart, 1 = mulet med duggregn, 2 eller fler = åska.
+  function vaderFor(stad) {
+    const n = stad.distrikt.filter((d) => d.hus.some((t) => t.brand)).length;
+    return n === 0 ? 'klart' : n === 1 ? 'mulet' : 'aska';
+  }
+  // Jämnt utspridda slumptal (mulberry32), samma varje gång
+  function slump(fro) {
+    let a = fro >>> 0;
+    return () => {
+      a = (a + 0x6D2B79F5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  const r1 = slump(11), r2 = slump(22), r3 = slump(33);
+  const DROPPAR = Array.from({ length: 120 }, () => ({ x: r1(), y: r1(), v: 0.8 + r1() * 0.5 }));
+  const MOLN = Array.from({ length: 9 }, (_, k) => ({ x: (k + r2() * 0.6) / 9, y: r2(), r: 14 + r2() * 14 }));
+  const STJARNOR = Array.from({ length: 60 }, () => ({ x: r3(), y: r3(), r: 0.5 + r3(), a: 0.3 + r3() * 0.6 }));
+
+  function himmel(ctx) {
+    if (S.vader !== 'klart') return;
+    ctx.setTransform(S.dpr, 0, 0, S.dpr, 0, 0);
+    if (S.tema === 'dark') {
+      STJARNOR.forEach((st, k) => {
+        const blink = S.anim ? 0.75 + 0.25 * Math.sin(S.tid / 900 + k) : 1;
+        ctx.globalAlpha = st.a * blink;
+        ctx.fillStyle = '#CFE8D6';
+        ctx.beginPath(); ctx.arc(st.x * S.w, st.y * S.h * 0.8, st.r, 0, Math.PI * 2); ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+      const mx = S.w - 54, my = 176;
+      ctx.fillStyle = '#E8F5EC';
+      ctx.beginPath(); ctx.arc(mx, my, 13, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = PALETT.dark.bg;
+      ctx.beginPath(); ctx.arc(mx + 6, my - 4, 12, 0, Math.PI * 2); ctx.fill();
+    } else {
+      ctx.globalAlpha = 0.25;
+      ctx.fillStyle = '#FFE08A';
+      ctx.beginPath(); ctx.arc(S.w - 54, 176, 30, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = '#FFD25A';
+      ctx.beginPath(); ctx.arc(S.w - 54, 176, 16, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  function vader(ctx) {
+    if (S.vader === 'klart') return;
+    ctx.setTransform(S.dpr, 0, 0, S.dpr, 0, 0);
+    const t = S.anim ? S.tid : 0;
+    const aska = S.vader === 'aska';
+    const natt = S.tema === 'dark';
+    // Regn (duggregn vid mulet)
+    const antal = aska ? DROPPAR.length : 35;
+    ctx.strokeStyle = natt ? 'rgba(127,167,201,.55)' : 'rgba(70,100,130,.45)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let k = 0; k < antal; k++) {
+      const d = DROPPAR[k];
+      const y = (d.y * S.h + t * 0.5 * d.v) % S.h;
+      const x = ((d.x * (S.w + 40) - (t * 0.12 * d.v)) % (S.w + 40) + S.w + 40) % (S.w + 40) - 20;
+      const l = aska ? 12 : 7;
+      ctx.moveTo(x, y); ctx.lineTo(x - l * 0.3, y + l);
+    }
+    ctx.stroke();
+    // Moln som driver förbi, under HUD:en
+    const molnFarg = natt ? (aska ? 'rgba(22,30,26,.82)' : 'rgba(40,52,45,.6)') : (aska ? 'rgba(110,125,118,.7)' : 'rgba(170,185,176,.55)');
+    ctx.fillStyle = molnFarg;
+    MOLN.forEach((m) => {
+      const x = ((m.x * (S.w + 120) + t * 0.008) % (S.w + 120)) - 60;
+      const y = 150 + m.y * 50;
+      ctx.beginPath();
+      ctx.arc(x, y, m.r, 0, Math.PI * 2);
+      ctx.arc(x + m.r * 0.9, y + 6, m.r * 0.75, 0, Math.PI * 2);
+      ctx.arc(x - m.r * 0.9, y + 8, m.r * 0.65, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    // Blixt var 5:e sekund vid åska
+    if (aska && S.anim) {
+      const fas = S.tid % 5000;
+      if (fas < 180) {
+        ctx.fillStyle = 'rgba(220,232,255,' + (fas < 60 || fas > 120 ? 0.18 : 0.06) + ')';
+        ctx.fillRect(0, 0, S.w, S.h);
+        const x0 = S.w * (0.3 + hash('blixt', Math.floor(S.tid / 5000)) * 0.4);
+        ctx.strokeStyle = '#FFF7C2';
+        ctx.lineWidth = 2.5;
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        ctx.moveTo(x0, 170); ctx.lineTo(x0 - 12, 220); ctx.lineTo(x0 + 2, 222); ctx.lineTo(x0 - 14, 280);
+        ctx.stroke();
+      }
+    }
+  }
+
+  // ---------- Taxi till ett distrikt ----------
+  function taxiLage() {
+    if (!S.taxi) return null;
+    const x = S.taxi;
+    const nu = performance.now();
+    const k = x.framme ? 1 : Math.min(1, (nu - x.t0) / x.dur);
+    const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; // mjuk start och inbromsning
+    if (k >= 1 && !x.framme) {
+      x.framme = true;
+      setTimeout(() => { if (x.cb) x.cb(); }, 0);
+    }
+    return { i: x.start + e * (x.slut - x.start), j: x.j, rikt: x.slut >= x.start ? 1 : -1 };
+  }
+
+  function taxiTill(namn, cb) {
+    const d = S.stad && S.stad.distrikt.find((x) => x.namn === namn);
+    if (!d) return false;
+    // Taxin startar på den bortre sidan av staden så att resan syns
+    const slut = d.i0 + 1.5;
+    const start = slut < S.stad.storlek.i / 2 ? S.stad.storlek.i - 0.5 : 0;
+    const langd = Math.abs(slut - start);
+    S.vald = null;
+    S.taxi = { namn, j: d.j0 - 1, start, slut, t0: performance.now(), dur: Math.min(4000, Math.max(2000, langd / 3.5 * 1000)), framme: false, cb };
+    if (!S.anim) { S.taxi.framme = true; setTimeout(cb, 0); }
+    rita();
+    return true;
   }
 
   function rundad(ctx, x, y, w, h, r) {
@@ -440,6 +647,7 @@
 
   function valj(namn) {
     S.vald = namn || null;
+    if (!namn) S.taxi = null;
     rita();
   }
 
@@ -534,6 +742,7 @@
     S.onValj = (opts && opts.onValj) || null;
     S.anim = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     S.stad = bygg(repon);
+    S.vader = vaderFor(S.stad);
     storleksandra();
     centrera();
     pekare(canvas);
@@ -545,7 +754,9 @@
   // Bygger om staden med nya repon (t.ex. efter hämtning från GitHub)
   function sattRepon(repon) {
     S.stad = bygg(repon);
+    S.vader = vaderFor(S.stad);
     S.vald = null;
+    S.taxi = null;
     if (S.canvas) centrera();
   }
 
@@ -567,12 +778,15 @@
       kamera: { ...S.kam },
       bredd: (S.stad.storlek.i + S.stad.storlek.j) * TW / 2 * S.kam.s,
       tema: S.tema,
+      vader: S.vader,
+      brandbilar: S.stad.brandbilar.map((b) => b.namn),
+      taxi: S.taxi ? { namn: S.taxi.namn, framme: S.taxi.framme } : null,
       vald: S.vald
     };
   }
 
   window.CsStad = {
-    starta, rita, centrera, valj, fokus, sattRepon, sattTema, lage, skarmpunkt, bygg, zonFor, ZON,
+    starta, rita, centrera, valj, fokus, sattRepon, taxi: taxiTill, sattTema, lage, skarmpunkt, bygg, zonFor, ZON,
     get klar() { return S.klar; }
   };
 })();

@@ -100,7 +100,8 @@
     $('hud-brander').textContent = String(brander);
     $('hud-brander').classList.toggle('varning', brander > 0);
     const d = new Date();
-    $('hud-datum').textContent = d.toLocaleDateString('sv-SE', { weekday: 'short', day: 'numeric', month: 'short' }) + ' · ' + repon.length + ' distrikt';
+    const vader = { klart: 'Klart', mulet: 'Mulet', aska: 'Åska' }[window.CsStad.lage().vader] || '';
+    $('hud-datum').textContent = d.toLocaleDateString('sv-SE', { weekday: 'short', day: 'numeric', month: 'short' }) + ' · ' + repon.length + ' distrikt' + (vader ? ' · ' + vader : '');
   }
 
   function konto() {
@@ -116,7 +117,7 @@
       const d = dagarSedan(r.senast);
       if (r.ci === 'fel') {
         const steg = r.brand && r.brand.steg && r.brand.steg[0] ? ' (' + r.brand.steg[0].split(' › ').pop() + ')' : '';
-        h.push({ typ: 'brand', namn: r.namn, text: 'Brand i ' + r.namn + '! Bygget på main är rött' + steg });
+        h.push({ typ: 'brand', namn: r.namn, text: 'Brand i ' + r.namn + '! Brandkåren är på plats' + steg });
       }
       if (r.prOppna) h.push({ typ: 'bygge', namn: r.namn, text: 'Byggstart i ' + r.namn + ': ' + r.prOppna + ' öppen PR' });
       if (r.release) h.push({ typ: 'torn', namn: r.namn, text: 'Nytt landmärke i ' + r.namn + ': ' + r.release });
@@ -160,6 +161,7 @@
     const r = lage.perNamn.get(namn);
     if (!r) { stangAlla(); return; }
     $('gh-kort').hidden = true;
+    $('sok-kort').hidden = true;
     const zon = window.CsStad.ZON[window.CsStad.zonFor(r.sprak)].namn;
     const info = window.CsStad.lage().distrikt.find((d) => d.namn === namn) || {};
     $('kort-zon').textContent = zon + ' · ' + (r.sprak || 'okänt språk');
@@ -207,11 +209,13 @@
   function stangAlla() {
     $('kort').hidden = true;
     $('gh-kort').hidden = true;
+    $('sok-kort').hidden = true;
     window.CsStad.valj(null);
   }
 
   $('btn-stang').addEventListener('click', stangAlla);
   $('btn-gh-stang').addEventListener('click', stangAlla);
+  $('btn-sok-stang').addEventListener('click', stangAlla);
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') stangAlla(); });
   $('btn-centrera').addEventListener('click', () => { stangAlla(); window.CsStad.centrera(); });
 
@@ -222,6 +226,54 @@
   $('distrikt-lista').addEventListener('click', (e) => {
     const b = e.target.closest('button[data-namn]');
     if (b) oppna(b.dataset.namn);
+  });
+
+  // ---------- Sök och taxi ----------
+  function sokStatus(r) {
+    if (r.ci === 'fel') return 'brinner';
+    const d = dagarSedan(r.senast);
+    const still = stillaText(d);
+    if (still) return still.split(',')[0];
+    return r.ci === 'ok' ? 'grönt' : r.ci === 'pagar' ? 'bygger' : '';
+  }
+  function sokLista(q) {
+    const s = q.trim().toLowerCase();
+    const traffar = lage.repon
+      .filter((r) => !s || r.namn.toLowerCase().includes(s))
+      .sort((a, b) => (b.namn.toLowerCase().startsWith(s) - a.namn.toLowerCase().startsWith(s)) || a.namn.localeCompare(b.namn))
+      .slice(0, 8);
+    $('sok-lista').innerHTML = traffar.map((r) => {
+      const zon = window.CsStad.ZON[window.CsStad.zonFor(r.sprak)].namn;
+      const sub = [zon, r.sprak, sokStatus(r)].filter(Boolean).join(' · ');
+      const cls = r.ci === 'fel' ? 'fel' : r.ci === 'ok' ? 'ok' : '';
+      return '<li><button type="button" data-namn="' + esc(r.namn) + '"><span class="sok-prick ' + cls + '" aria-hidden="true"></span>' +
+        '<span class="sok-text"><span class="sok-namn">' + esc(r.namn) + '</span><span class="sok-sub">' + esc(sub) + '</span></span>' +
+        '<span class="sok-taxi">Taxi</span></button></li>';
+    }).join('');
+    $('sok-tom').hidden = traffar.length > 0;
+    return traffar;
+  }
+  function aktTaxi(namn) {
+    stangAlla();
+    $('sok').blur();
+    window.CsStad.taxi(namn, () => oppna(namn));
+  }
+  $('btn-sok').addEventListener('click', () => {
+    stangAlla();
+    $('sok').value = '';
+    sokLista('');
+    $('sok-kort').hidden = false;
+    $('sok').focus();
+  });
+  $('sok').addEventListener('input', () => sokLista($('sok').value));
+  $('form-sok').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const t = sokLista($('sok').value);
+    if (t.length) aktTaxi(t[0].namn);
+  });
+  $('sok-lista').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-namn]');
+    if (b) aktTaxi(b.dataset.namn);
   });
 
   // ---------- GitHub ----------
