@@ -625,17 +625,66 @@
     return { i: (a + b) / 2, j: (a - b) / 2 };
   }
 
+  // Skylt ovanför distriktet i världskoordinater (samma mått som i rita)
+  function skyltRuta(d) {
+    const p = iso(d.mitt.i, d.mitt.j);
+    const hog = Math.max(...d.hus.map((t) => t.h || 0));
+    const y = p.y - hog - 16 - (d.repo.release ? 22 : 0);
+    let w = d.namn.length * 5.2 + 14;
+    if (S.ctx) {
+      S.ctx.font = '600 9px Geist, -apple-system, system-ui, sans-serif';
+      w = S.ctx.measureText(d.namn).width + 14;
+    }
+    return { x: p.x - w / 2, y: y - 7, w, h: 14 };
+  }
+
+  // Husets kontur (sexhörning) i världskoordinater
+  function husKontur(t) {
+    const p = iso(t.i, t.j);
+    const w = t.typ === 'bygge' ? 0.5 : t.typ === 'torn' ? 0.55 : t.w;
+    const h = t.typ === 'bygge' ? 48 : t.h + (t.typ === 'torn' ? 20 : 0) + (t.brand ? 14 : 0);
+    const hw = TW / 2 * w, hh = TH / 2 * w;
+    return [[p.x - hw, p.y], [p.x, p.y + hh], [p.x + hw, p.y], [p.x + hw, p.y - h], [p.x, p.y - hh - h], [p.x - hw, p.y - h]];
+  }
+
+  function inuti(x, y, pts) {
+    let inne = false;
+    for (let a = 0, b = pts.length - 1; a < pts.length; b = a++) {
+      const [xa, ya] = pts[a], [xb, yb] = pts[b];
+      if ((ya > y) !== (yb > y) && x < (xb - xa) * (y - ya) / (yb - ya) + xa) inne = !inne;
+    }
+    return inne;
+  }
+
+  // Vilket distrikt ligger under fingret? Samma ordning som det ritas, uppifrån:
+  // 1. namnskyltar, 2. det främsta huset (högst i+j), 3. marken.
   function distriktVid(px, py) {
     if (!S.stad) return null;
-    const r = tillRuta(px, py);
-    // Träffa också höga hus: prova punkter längre ner på skärmen (bakom huset)
-    for (let dy = 0; dy <= 60; dy += 6) {
-      const q = tillRuta(px, py + dy * S.kam.s);
-      const hit = S.stad.distrikt.find((d) => q.i >= d.i0 - 0.5 && q.i < d.i0 + BLOCK - 0.5 && q.j >= d.j0 - 0.5 && q.j < d.j0 + BLOCK - 0.5);
-      if (hit) return hit;
-      if (dy === 0 && r.i < -1) break;
+    const wx = (px - S.kam.x) / S.kam.s, wy = (py - S.kam.y) / S.kam.s;
+    const synliga = S.stad.distrikt.filter((d) => !S.vald || S.vald === d.namn);
+    for (let k = synliga.length - 1; k >= 0; k--) {
+      const r = skyltRuta(synliga[k]);
+      if (wx >= r.x && wx <= r.x + r.w && wy >= r.y && wy <= r.y + r.h) return synliga[k];
     }
-    return null;
+    let bast = null, bastZ = -Infinity;
+    S.stad.distrikt.forEach((d) => d.hus.forEach((t) => {
+      if (t.typ !== 'hus' && t.typ !== 'torn' && t.typ !== 'bygge') return;
+      const z = t.i + t.j;
+      if (z > bastZ && inuti(wx, wy, husKontur(t))) { bast = d; bastZ = z; }
+    }));
+    if (bast) return bast;
+    const q = tillRuta(px, py);
+    return S.stad.distrikt.find((d) => q.i >= d.i0 - 0.5 && q.i < d.i0 + BLOCK - 0.5 && q.j >= d.j0 - 0.5 && q.j < d.j0 + BLOCK - 0.5) || null;
+  }
+
+  // Skärmpunkt mitt på taket på distriktets högsta hus (för tester)
+  function takpunkt(namn) {
+    const d = S.stad && S.stad.distrikt.find((x) => x.namn === namn);
+    if (!d) return null;
+    const t = d.hus.filter((x) => x.typ === 'hus' || x.typ === 'torn').sort((a, b) => b.h - a.h)[0];
+    if (!t) return null;
+    const p = iso(t.i, t.j);
+    return { x: S.kam.x + p.x * S.kam.s, y: S.kam.y + (p.y - t.h + 2) * S.kam.s };
   }
 
   function skarmpunkt(namn) {
@@ -786,7 +835,7 @@
   }
 
   window.CsStad = {
-    starta, rita, centrera, valj, fokus, sattRepon, taxi: taxiTill, sattTema, lage, skarmpunkt, bygg, zonFor, ZON,
+    starta, rita, centrera, valj, fokus, sattRepon, taxi: taxiTill, takpunkt, distriktVid: (x, y) => { const d = distriktVid(x, y); return d ? d.namn : null; }, sattTema, lage, skarmpunkt, bygg, zonFor, ZON,
     get klar() { return S.klar; }
   };
 })();

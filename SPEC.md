@@ -28,7 +28,7 @@ Varje repo är ett distrikt, och det som händer i repot syns i staden: commits 
 - **GitHub-kort**: anslut med token (med instruktion för att skapa en), eller Uppdatera/Logga ut när man är ansluten.
 - **Vad brinner?** i distriktskortet när bygget är rött: workflow, jobb och steg som föll, felmeddelanden (annoteringar), commit, vem och när, samt länk till körningen.
 - **Toast** under HUD:en för kvitton och fel.
-- **Distriktskort** glider upp vid tryck på ett distrikt. Övriga distrikt tonas ned och kameran flyttar distriktet ovanför kortet.
+- **Distriktskort** glider upp vid tryck på ett distrikt. Trycket träffar det som ritas överst: först namnskylten, sedan det främsta huset (husets kontur inklusive tak, torn och lågor), sist marken. Så ger ett tak alltid husets eget distrikt även när huset skymmer ett distrikt bakom sig. Övriga distrikt tonas ned och kameran flyttar distriktet ovanför kortet.
 - Dold lista med alla distrikt som knappar för skärmläsare och tangentbord. Escape stänger kortet.
 
 ## 4. Spelregler (GitHub → stad)

@@ -5,8 +5,8 @@ Automatiserade testfall körs dessutom av Playwright vid varje commit och är ko
 
 | | |
 |---|---|
-| **Testfall** | 24 |
-| **Automatiserade** | 20 (körs på iPhone/WebKit och Android/Chromium) |
+| **Testfall** | 25 |
+| **Automatiserade** | 21 (körs på iPhone/WebKit och Android/Chromium) |
 | **Manuella** | 4 (kräver riktig iPhone, fingrar, skärmläsare eller riktigt GitHub-konto) |
 | **Senaste testrapport** | [dennishoglund.github.io/commit-staden/rapport/](https://dennishoglund.github.io/commit-staden/rapport/) |
 | **Krav** | [SPEC.md](../SPEC.md) |
@@ -25,6 +25,7 @@ Automatiserade testfall körs dessutom av Playwright vid varje commit och är ko
 | [TC-STA-06](testfall/TC-STA-06.md) | [Dra för att flytta staden och Centrera för att återställa](testfall/TC-STA-06.md) | Medel | 🤖 |
 | [TC-STA-07](testfall/TC-STA-07.md) | [Distrikten går att öppna med tangentbord och skärmläsare](testfall/TC-STA-07.md) | Låg | 🤖 |
 | [TC-STA-08](testfall/TC-STA-08.md) | [Nyp för att zooma](testfall/TC-STA-08.md) | Medel | 🖐️ |
+| [TC-STA-09](testfall/TC-STA-09.md) | [Tryck på ett tak eller en skylt ger rätt distrikt](testfall/TC-STA-09.md) | Hög | 🤖 |
 
 ## GitHub
 

@@ -43,7 +43,8 @@ test.describe('Staden', () => {
   });
 
   test('tryck på ett distrikt öppnar distriktskortet', { annotation: { type: 'testfall', description: 'TC-STA-03' } }, async ({ staden: page }) => {
-    const p = await page.evaluate(() => window.CsStad.skarmpunkt('jaktvind'));
+    // Tryck på taket (marken i mitten kan skymmas av husen framför)
+    const p = await page.evaluate(() => window.CsStad.takpunkt('jaktvind'));
     await page.touchscreen.tap(p.x, p.y);
     await expect(page.locator('#kort')).toBeVisible();
     await expect(page.locator('#kort-titel')).toHaveText('jaktvind');
@@ -116,5 +117,27 @@ test.describe('Staden', () => {
     await expect(page.getByRole('dialog', { name: 'virkesfynd' })).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(page.locator('#kort')).toBeHidden();
+  });
+
+  test('tryck på ett tak eller en skylt ger rätt distrikt', { annotation: { type: 'testfall', description: 'TC-STA-09' } }, async ({ staden: page }) => {
+    // Höga hus täcker marken bakom sig. Ett tryck på taket ska ge husets eget distrikt,
+    // inte distriktet vars mark ligger bakom (tidigare fel: 4 av 9 tak gav fel repo).
+    const namn = await page.evaluate(() => window.CsDemo.repon.map((r) => r.namn));
+    const vy = page.viewportSize();
+    let provade = 0;
+    for (const n of namn) {
+      const p = await page.evaluate((x) => window.CsStad.takpunkt(x), n);
+      if (!p || p.x < 10 || p.x > vy.width - 10 || p.y < 10 || p.y > vy.height - 170) continue;
+      await page.touchscreen.tap(p.x, p.y);
+      await expect(page.locator('#kort-titel'), 'tak på ' + n).toHaveText(n);
+      await page.locator('#btn-stang').click();
+      await page.locator('#btn-centrera').click();
+      provade++;
+    }
+    expect(provade).toBeGreaterThanOrEqual(5);
+    // Samma sak med logiken direkt för alla distrikt, även de utanför skärmen
+    const fel = await page.evaluate(() => window.CsDemo.repon.map((r) => r.namn)
+      .filter((n) => { const p = window.CsStad.takpunkt(n); return window.CsStad.distriktVid(p.x, p.y) !== n; }));
+    expect(fel).toEqual([]);
   });
 });
