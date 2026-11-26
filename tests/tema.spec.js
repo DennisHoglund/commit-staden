@@ -1,4 +1,5 @@
 const { test, expect, bild, lage } = require('./hjalp');
+const { ansluten } = require('./mock');
 
 test.describe('Tema', () => {
   test('temaknappen växlar Auto → Ljust → Mörkt och sparar valet', { annotation: { type: 'testfall', description: 'TC-TEM-01' } }, async ({ staden: page }) => {
@@ -19,8 +20,9 @@ test.describe('Tema', () => {
 
   test('mörkt nattläge följer telefonen', { annotation: { type: 'testfall', description: 'TC-TEM-02' } }, async ({ page, api }) => {
     await page.emulateMedia({ colorScheme: 'dark' });
+    await ansluten(page);
     await page.goto('./');
-    await page.waitForFunction(() => window.CsStad && window.CsStad.klar);
+    await page.waitForFunction(() => window.CsStad && window.CsStad.klar && window.CsStad.lage().distrikt.length === 3);
     const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
     expect(bg).toBe('rgb(0, 0, 0)');
     expect((await lage(page)).tema).toBe('dark');
@@ -29,8 +31,9 @@ test.describe('Tema', () => {
 
   test('ljust läge ger dagstaden', { annotation: { type: 'testfall', description: 'TC-TEM-03' } }, async ({ page, api }) => {
     await page.emulateMedia({ colorScheme: 'light' });
+    await ansluten(page);
     await page.goto('./');
-    await page.waitForFunction(() => window.CsStad && window.CsStad.klar);
+    await page.waitForFunction(() => window.CsStad && window.CsStad.klar && window.CsStad.lage().distrikt.length === 3);
     const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
     expect(bg).toBe('rgb(220, 235, 224)');
     expect((await lage(page)).tema).toBe('light');

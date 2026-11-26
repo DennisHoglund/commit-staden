@@ -8,7 +8,7 @@
 | **Prioritet** | Medel |
 | **Typ** | 🤖 Automatiserad |
 | **Krav** | [SPEC.md](../../SPEC.md) |
-| **Playwright** | [`tests/tema.spec.js`](../../tests/tema.spec.js#L4) – *temaknappen växlar Auto → Ljust → Mörkt och sparar valet* |
+| **Playwright** | [`tests/tema.spec.js`](../../tests/tema.spec.js#L5) – *temaknappen växlar Auto → Ljust → Mörkt och sparar valet* |
 
 ## Förutsättningar
 

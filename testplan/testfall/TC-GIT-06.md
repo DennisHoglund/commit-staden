@@ -1,6 +1,6 @@
 [← Testplan](../index.md)
 
-# TC-GIT-06 · Utgången token vid start visar demon och ber om ny token
+# TC-GIT-06 · Utgången token vid start tömmer staden och ber om ny token
 
 | | |
 |---|---|
@@ -8,7 +8,7 @@
 | **Prioritet** | Medel |
 | **Typ** | 🤖 Automatiserad |
 | **Krav** | [SPEC.md avsnitt 5](../../SPEC.md) |
-| **Playwright** | [`tests/github.spec.js`](../../tests/github.spec.js#L125) – *utgången token vid start visar demon och ber om ny token* |
+| **Playwright** | [`tests/github.spec.js`](../../tests/github.spec.js#L140) – *utgången token vid start tömmer staden och ber om ny token* |
 
 ## Förutsättningar
 

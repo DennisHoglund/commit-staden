@@ -8,7 +8,7 @@
 | **Prioritet** | Medel |
 | **Typ** | 🤖 Automatiserad |
 | **Krav** | [SPEC.md avsnitt 5](../../SPEC.md) |
-| **Playwright** | [`tests/github.spec.js`](../../tests/github.spec.js#L91) – *staden visas från senaste hämtningen när GitHub inte nås* |
+| **Playwright** | [`tests/github.spec.js`](../../tests/github.spec.js#L106) – *staden visas från senaste hämtningen när GitHub inte nås* |
 
 ## Förutsättningar
 

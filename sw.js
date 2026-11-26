@@ -1,5 +1,5 @@
 // Höj versionen vid varje deploy så att telefonen hämtar nya filer.
-const CACHE = 'commit-staden-v8';
+const CACHE = 'commit-staden-v9';
 
 const SHELL = [
   './',
@@ -7,7 +7,6 @@ const SHELL = [
   './styles.css',
   './app.js',
   './stad.js',
-  './demo.js',
   './github.js',
   './manifest.webmanifest',
   './icons/icon.svg',

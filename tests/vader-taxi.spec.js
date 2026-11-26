@@ -1,10 +1,10 @@
-const { test, expect, bild, lage } = require('./hjalp');
+const { test, expect, bild, lage, stadRepon } = require('./hjalp');
 
 const repo = (namn, ci) => ({ namn, sprak: 'JavaScript', commits: 60, rader: 1000, veckans: 1, ci, ciAndel: 1, prOppna: 0, issues: 0, senast: new Date().toISOString() });
 
 test.describe('Väder', () => {
   test('vädret visar hur byggena mår', { annotation: { type: 'testfall', description: 'TC-VAD-01' } }, async ({ staden: page }) => {
-    // Demon har ett rött bygge: mulet
+    // Testdatan har ett rött bygge: mulet
     expect((await lage(page)).vader).toBe('mulet');
     await expect(page.locator('#hud-datum')).toContainText('Mulet');
 
@@ -27,7 +27,7 @@ test.describe('Taxi', () => {
   test('sök och åk taxi till ett distrikt', { annotation: { type: 'testfall', description: 'TC-TAX-01' } }, async ({ staden: page }) => {
     await page.locator('#btn-sok').click();
     await expect(page.getByRole('dialog', { name: 'Sök i staden' })).toBeVisible();
-    const antal = await page.evaluate(() => window.CsDemo.repon.length);
+    const antal = stadRepon.length;
     await expect(page.locator('#sok-lista button')).toHaveCount(Math.min(8, antal));
     await page.locator('#sok').fill('ELK');
     await expect(page.locator('#sok-lista button')).toHaveCount(1);

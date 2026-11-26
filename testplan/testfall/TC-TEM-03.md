@@ -8,7 +8,7 @@
 | **Prioritet** | Låg |
 | **Typ** | 🤖 Automatiserad |
 | **Krav** | [SPEC.md](../../SPEC.md) |
-| **Playwright** | [`tests/tema.spec.js`](../../tests/tema.spec.js#L30) – *ljust läge ger dagstaden* |
+| **Playwright** | [`tests/tema.spec.js`](../../tests/tema.spec.js#L32) – *ljust läge ger dagstaden* |
 
 ## Förutsättningar
 

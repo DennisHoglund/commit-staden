@@ -1,8 +1,8 @@
-const { test, expect, bild, lage } = require('./hjalp');
+const { test, expect, bild, lage, stadRepon } = require('./hjalp');
 
 test.describe('Staden', () => {
-  test('demostaden ritas med ett distrikt per repo', { annotation: { type: 'testfall', description: 'TC-STA-01' } }, async ({ staden: page }) => {
-    const antal = await page.evaluate(() => window.CsDemo.repon.length);
+  test('staden ritas med ett distrikt per repo', { annotation: { type: 'testfall', description: 'TC-STA-01' } }, async ({ staden: page }) => {
+    const antal = stadRepon.length;
     await expect(page.locator('#distrikt-lista button')).toHaveCount(antal);
     const l = await lage(page);
     expect(l.distrikt).toHaveLength(antal);
@@ -10,7 +10,7 @@ test.describe('Staden', () => {
     expect(l.bredd).toBeGreaterThanOrEqual(page.viewportSize().width - 16);
     // Små repon blir minst tre hus
     expect(Math.min(...l.distrikt.map((d) => d.hus))).toBeGreaterThanOrEqual(3);
-    await expect(page.locator('#btn-konto')).toHaveText('Demo');
+    await expect(page.locator('#btn-konto')).toHaveText('testdennis');
 
     // Canvasen ska innehålla mer än bakgrundsfärg
     const farger = await page.evaluate(() => {
@@ -25,8 +25,7 @@ test.describe('Staden', () => {
   });
 
   test('HUD:en visar invånare, budget, nöjdhet och bränder', { annotation: { type: 'testfall', description: 'TC-STA-02' } }, async ({ staden: page }) => {
-    const v = await page.evaluate(() => {
-      const r = window.CsDemo.repon;
+    const v = await page.evaluate((r) => {
       const sum = (f) => r.reduce((s, x) => s + (x[f] || 0), 0);
       return {
         invanare: sum('rader').toLocaleString('sv-SE'),
@@ -34,7 +33,7 @@ test.describe('Staden', () => {
         nojdhet: Math.round(r.reduce((s, x) => s + x.ciAndel, 0) / r.length * 100) + ' %',
         brander: String(r.filter((x) => x.ci === 'fel').length)
       };
-    });
+    }, stadRepon);
     await expect(page.locator('#hud-invanare')).toHaveText(v.invanare);
     await expect(page.locator('#hud-budget')).toHaveText(v.budget);
     await expect(page.locator('#hud-nojdhet')).toHaveText(v.nojdhet);
@@ -72,7 +71,7 @@ test.describe('Staden', () => {
     await expect(page.locator('#kort-titel')).toHaveText('elkoll');
     await expect(page.locator('#kort-siffror')).toContainText('Rött');
     await expect(page.locator('#kort-siffror')).toContainText('huset brinner');
-    // Demon visar också varför det brinner
+    // Kortet visar också varför det brinner
     await expect(page.locator('#kort-brand')).toBeVisible();
     await expect(page.locator('#brand-workflow')).toContainText('Kör Playwright-testerna');
   });
@@ -122,7 +121,7 @@ test.describe('Staden', () => {
   test('tryck på ett tak eller en skylt ger rätt distrikt', { annotation: { type: 'testfall', description: 'TC-STA-09' } }, async ({ staden: page }) => {
     // Höga hus täcker marken bakom sig. Ett tryck på taket ska ge husets eget distrikt,
     // inte distriktet vars mark ligger bakom (tidigare fel: 4 av 9 tak gav fel repo).
-    const namn = await page.evaluate(() => window.CsDemo.repon.map((r) => r.namn));
+    const namn = stadRepon.map((r) => r.namn);
     const vy = page.viewportSize();
     let provade = 0;
     for (const n of namn) {
@@ -136,8 +135,8 @@ test.describe('Staden', () => {
     }
     expect(provade).toBeGreaterThanOrEqual(5);
     // Samma sak med logiken direkt för alla distrikt, även de utanför skärmen
-    const fel = await page.evaluate(() => window.CsDemo.repon.map((r) => r.namn)
-      .filter((n) => { const p = window.CsStad.takpunkt(n); return window.CsStad.distriktVid(p.x, p.y) !== n; }));
+    const fel = await page.evaluate((alla) => alla
+      .filter((n) => { const p = window.CsStad.takpunkt(n); return window.CsStad.distriktVid(p.x, p.y) !== n; }), namn);
     expect(fel).toEqual([]);
   });
 });

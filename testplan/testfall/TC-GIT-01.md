@@ -8,7 +8,7 @@
 | **Prioritet** | Hög |
 | **Typ** | 🤖 Automatiserad |
 | **Krav** | [SPEC.md avsnitt 5](../../SPEC.md) |
-| **Playwright** | [`tests/github.spec.js`](../../tests/github.spec.js#L11) – *anslut med token bygger staden av mina repon* |
+| **Playwright** | [`tests/github.spec.js`](../../tests/github.spec.js#L25) – *anslut med token bygger staden av mina repon* |
 
 ## Förutsättningar
 

@@ -8,7 +8,7 @@
 | **Prioritet** | Medel |
 | **Typ** | 🤖 Automatiserad |
 | **Krav** | [SPEC.md](../../SPEC.md) |
-| **Playwright** | [`tests/tema.spec.js`](../../tests/tema.spec.js#L20) – *mörkt nattläge följer telefonen* |
+| **Playwright** | [`tests/tema.spec.js`](../../tests/tema.spec.js#L21) – *mörkt nattläge följer telefonen* |
 
 ## Förutsättningar
 

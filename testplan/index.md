@@ -17,7 +17,7 @@ Automatiserade testfall körs dessutom av Playwright vid varje commit och är ko
 
 | ID | Testfall | Prio | Typ |
 |---|---|---|---|
-| [TC-STA-01](testfall/TC-STA-01.md) | [Demostaden ritas med ett distrikt per repo](testfall/TC-STA-01.md) | Hög | 🤖 |
+| [TC-STA-01](testfall/TC-STA-01.md) | [Staden ritas med ett distrikt per repo](testfall/TC-STA-01.md) | Hög | 🤖 |
 | [TC-STA-02](testfall/TC-STA-02.md) | [HUD:en visar invånare, budget, nöjdhet och bränder](testfall/TC-STA-02.md) | Hög | 🤖 |
 | [TC-STA-03](testfall/TC-STA-03.md) | [Tryck på ett distrikt öppnar distriktskortet](testfall/TC-STA-03.md) | Hög | 🤖 |
 | [TC-STA-04](testfall/TC-STA-04.md) | [Rött bygge syns som brand och i nyhetsraden](testfall/TC-STA-04.md) | Hög | 🤖 |
@@ -35,8 +35,9 @@ Automatiserade testfall körs dessutom av Playwright vid varje commit och är ko
 | [TC-GIT-02](testfall/TC-GIT-02.md) | [Fel token ger tydligt fel och sparas inte](testfall/TC-GIT-02.md) | Hög | 🤖 |
 | [TC-GIT-03](testfall/TC-GIT-03.md) | [Vad brinner? visar workflow, steg, fel och länk till körningen](testfall/TC-GIT-03.md) | Hög | 🤖 |
 | [TC-GIT-04](testfall/TC-GIT-04.md) | [Staden visas från senaste hämtningen när GitHub inte nås](testfall/TC-GIT-04.md) | Medel | 🤖 |
-| [TC-GIT-05](testfall/TC-GIT-05.md) | [Logga ut tar bort token och visar demostaden](testfall/TC-GIT-05.md) | Medel | 🤖 |
-| [TC-GIT-06](testfall/TC-GIT-06.md) | [Utgången token vid start visar demon och ber om ny token](testfall/TC-GIT-06.md) | Medel | 🤖 |
+| [TC-GIT-05](testfall/TC-GIT-05.md) | [Logga ut tar bort token och tömmer staden](testfall/TC-GIT-05.md) | Medel | 🤖 |
+| [TC-GIT-06](testfall/TC-GIT-06.md) | [Utgången token vid start tömmer staden och ber om ny token](testfall/TC-GIT-06.md) | Medel | 🤖 |
+| [TC-GIT-08](testfall/TC-GIT-08.md) | [Utan token visas ingen påhittad stad, bara Anslut GitHub](testfall/TC-GIT-08.md) | Hög | 🤖 |
 | [TC-GIT-07](testfall/TC-GIT-07.md) | [Skapa token på iPhone och anslut](testfall/TC-GIT-07.md) | Hög | 🖐️ |
 
 ## Väder och utryckning

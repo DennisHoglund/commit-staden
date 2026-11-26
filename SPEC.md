@@ -6,7 +6,7 @@ Varje repo är ett distrikt, och det som händer i repot syns i staden: commits 
 öppna PR blir byggarbetsplatser, issues blir trafik och repon som står still blir grå och fulla av träd.
 
 ## 2. Stack
-- Ren HTML/CSS/JS utan byggsteg. Moduler som IIFE på `window` (`CsStad`, `CsGithub`, `CsDemo`).
+- Ren HTML/CSS/JS utan byggsteg. Moduler som IIFE på `window` (`CsStad`, `CsGithub`, `CsApp`).
 - Staden ritas på `<canvas>` i 2D-isometri (ingen Three.js) för att vara lätt och snabb på iPhone.
 - Typsnitt: Geist, Geist Mono och Silkscreen från Google Fonts (cachas av service workern).
 - Data från GitHubs REST-API direkt från telefonen med en fine-grained token som bara får läsa. Ingen egen server, ingen Supabase.
@@ -20,7 +20,7 @@ Varje repo är ett distrikt, och det som händer i repot syns i staden: commits 
 - Glasytor (HUD, nyhetsrad, verktyg, distriktskort) med `backdrop-filter`.
 
 ### 3.2 Skärmen
-- **HUD** överst: Invånare, Budget, Nöjdhet, Bränder, datum och antal distrikt. Knappen uppe till höger visar **Demo** eller ditt GitHub-namn och öppnar GitHub-kortet.
+- **HUD** överst: Invånare, Budget, Nöjdhet, Bränder, datum och antal distrikt. Knappen uppe till höger visar **Anslut** eller ditt GitHub-namn och öppnar GitHub-kortet.
 - **Staden** fyller skärmen: Centrera visar hela höjden och låter kanterna gå utanför på bredden (högst 1,5 gånger skärmbredden). Dra för att flytta, nyp (två fingrar) eller scrolla för att zooma.
 - **Nyhetsrad** ovanför verktygen visar händelser, en i taget var 6:e sekund. Tryck öppnar distriktet.
 - **Verktyg**: Centrera, Sök, GitHub och Tema (ikon över text).
@@ -54,7 +54,8 @@ Varje repo är ett distrikt, och det som händer i repot syns i staden: commits 
 ### 5.1 Token
 - Fine-grained personal access token, Repository access **All repositories**, Read-only för **Actions**, **Contents**, **Issues** och **Pull requests** (Metadata följer med).
 - Sparas bara i telefonen (`cs-token`). Börjar med `github_pat_` eller `ghp_`, annat stoppas innan något skickas.
-- 401 vid start: token och cache tas bort, demon visas och GitHub-kortet ber om ny token.
+- Ingen demo och ingen påhittad data: utan token är staden tom, GitHub-kortet öppnas direkt vid start och nyhetsraden säger att man ska ansluta.
+- 401 vid start: token och cache tas bort, staden töms och GitHub-kortet ber om ny token.
 
 ### 5.2 Hämtning (`github.js`)
 `/user` och `/user/repos?affiliation=owner&sort=pushed` (forkar räknas inte, max 30 repon). Per repo, högst 6 repon samtidigt:
@@ -76,7 +77,7 @@ Hämtas igen när appen öppnas efter mer än 5 minuter, eller med **Uppdatera**
 { namn, sprak, commits, rader, veckans, ci: 'ok'|'fel'|'pagar'|'', ciAndel, prOppna, issues, senast: ISO, release, url,
   brand: { workflow, steg: [], fel: [], sha, meddelande, vem, tid, url } }
 ```
-`demo.js` har påhittade värden (även en brand i elkoll) som visas när man inte är ansluten.
+Testerna använder färdiga repon i den här modellen från `tests/stad-data.js` (påhittade, bara i testerna) och ritar dem via `window.CsApp.visa(repon, { login, tid })`.
 
 ### 5.4 Tips
 Lägg till Playwrights `github`-reporter i CI i dina andra repon (som här), så blir varje fallerat test en annotering som syns i **Vad brinner?**.
@@ -97,7 +98,7 @@ Testplan i `testplan/` (docs-as-code). Rapport: https://dennishoglund.github.io/
 - Inspiration från Git City, GitCity, Repolis, RepoVerse och CodeCity, men simuleringen (händelser som spelmekanik) är egen.
 
 ## 9. Kvar att göra
-1. ~~Steg 1: PWA-skal, demostad, tester och CI~~
+1. ~~Steg 1: PWA-skal, demostad, tester och CI~~ (demostaden borttagen: bara riktiga repon visas)
 2. ~~Steg 2: GitHub-token, riktiga repon, cache, Vad brinner?~~ (steg 3 och 4 ingick)
 3. Steg 3: tidslinje – spola upp historiken och se staden växa.
 4. Senare: zooma in i ett distrikt (mappar som kvarter), fler teman, SVG till README, LED-matrisen 64×32.

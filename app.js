@@ -69,14 +69,14 @@
   ljusQuery.addEventListener('change', () => applyTheme(currentTheme()));
 
   // ---------- Läge ----------
-  const lage = { repon: [], perNamn: new Map(), demo: true, login: '', tid: '', hamtar: false };
+  const lage = { repon: [], perNamn: new Map(), ansluten: false, login: '', tid: '', hamtar: false };
 
   function visa(repon, info) {
     lage.repon = repon;
     lage.perNamn = new Map(repon.map((r) => [r.namn, r]));
-    lage.demo = !!info.demo;
-    lage.login = info.login || '';
-    lage.tid = info.tid || '';
+    lage.login = (info && info.login) || '';
+    lage.ansluten = !!lage.login;
+    lage.tid = (info && info.tid) || '';
     $('kort').hidden = true;
     window.CsStad.sattRepon(repon);
     hud();
@@ -106,8 +106,8 @@
 
   function konto() {
     const b = $('btn-konto');
-    b.textContent = lage.hamtar && lage.demo ? 'Hämtar…' : lage.demo ? 'Demo' : lage.login;
-    b.setAttribute('aria-label', lage.demo ? 'Demoläge. Anslut GitHub' : 'GitHub-konto ' + lage.login);
+    b.textContent = lage.ansluten ? lage.login : lage.hamtar ? 'Hämtar…' : 'Anslut';
+    b.setAttribute('aria-label', lage.ansluten ? 'GitHub-konto ' + lage.login : 'Inte ansluten. Anslut GitHub');
   }
 
   // ---------- Händelser till nyhetsraden ----------
@@ -135,7 +135,8 @@
   let tickerInfo = null;
   function visaTicker() {
     const t = $('ticker');
-    const e = tickerInfo || tickerLista[tickerIndex % Math.max(1, tickerLista.length)];
+    const tom = !lage.ansluten && !lage.hamtar ? { typ: 'info', text: 'Ingen stad än. Tryck Anslut och lägg in en GitHub-token så byggs staden av dina repon.' } : null;
+    const e = tickerInfo || tickerLista[tickerIndex % Math.max(1, tickerLista.length)] || tom;
     if (!e) { t.hidden = true; return; }
     t.hidden = false;
     t.dataset.typ = e.typ;
@@ -279,7 +280,7 @@
   // ---------- GitHub ----------
   function oppnaGithub() {
     stangAlla();
-    const inne = !!GH.token() && !lage.demo;
+    const inne = !!GH.token() && lage.ansluten;
     $('gh-ut').hidden = inne;
     $('gh-in').hidden = !inne;
     $('gh-titel').textContent = inne ? 'Ditt GitHub' : 'Anslut GitHub';
@@ -330,7 +331,7 @@
         setMsg(text, 'fel');
       } else if (e && e.typ === 'token') {
         GH.glomToken();
-        visa(window.CsDemo.repon, { demo: true });
+        visa([], {});
         oppnaGithub();
         setMsg(text + ' Skapa en ny token och anslut igen.', 'fel');
       } else {
@@ -355,7 +356,7 @@
   $('btn-uppdatera').addEventListener('click', () => { const t = GH.token(); if (t) uppdatera(t, false); });
   $('btn-loggaut').addEventListener('click', () => {
     GH.glomToken();
-    visa(window.CsDemo.repon, { demo: true });
+    visa([], {});
     $('gh-kort').hidden = true;
     toast('Utloggad. Token är borttagen från telefonen.');
   });
@@ -369,9 +370,10 @@
   if (tok && cache) {
     visa(cache.repon, { login: cache.login, tid: cache.tid });
   } else {
-    visa(window.CsDemo.repon, { demo: true });
+    visa([], {});
   }
   if (tok) uppdatera(tok, false);
+  else oppnaGithub(); // ingen token: be om den direkt
 
   // Hämta på nytt när appen öppnas igen efter en stund
   let senast = Date.now();
@@ -381,4 +383,6 @@
       uppdatera(GH.token(), false);
     }
   });
+  // Används av testerna för att rita en färdig stad utan att gå via GitHub
+  window.CsApp = { visa };
 })();

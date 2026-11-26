@@ -33,7 +33,7 @@ Läs `SPEC.md` för hela specifikationen. Det här är reglerna som gäller vid 
 - Stora tryckytor (≥ 44 px), `env(safe-area-inset-*)` för iPhone, respektera `prefers-reduced-motion`.
 
 ## Kod
-- Moduler som IIFE på `window` (`CsStad`, `CsGithub`, `CsDemo`).
+- Moduler som IIFE på `window` (`CsStad`, `CsGithub`, `CsApp`).
 - `localStorage` alltid i try/catch. Nycklar börjar med `cs-`.
 - Escapa all text som hamnar i HTML (`esc()`).
 

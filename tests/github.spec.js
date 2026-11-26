@@ -8,9 +8,23 @@ async function vantaPaStad(page, antal) {
 }
 
 test.describe('GitHub', () => {
-  test('anslut med token bygger staden av mina repon', { annotation: { type: 'testfall', description: 'TC-GIT-01' } }, async ({ staden: page, api }) => {
-    await expect(page.locator('#btn-konto')).toHaveText('Demo');
-    await page.locator('#btn-github').click();
+  test('utan token visas ingen påhittad stad, bara Anslut GitHub', { annotation: { type: 'testfall', description: 'TC-GIT-08' } }, async ({ page, api }) => {
+    await page.goto('./');
+    await page.waitForFunction(() => window.CsStad && window.CsStad.klar);
+    await expect(page.getByRole('dialog', { name: 'Anslut GitHub' })).toBeVisible();
+    await expect(page.locator('#btn-konto')).toHaveText('Anslut');
+    expect((await lage(page)).distrikt).toHaveLength(0);
+    await expect(page.locator('#hud-brander')).toHaveText('0');
+    await expect(page.locator('#distrikt-lista button')).toHaveCount(0);
+    expect(api.anrop.filter((a) => a.startsWith('/'))).toHaveLength(0);
+    await bild(page, 'Start utan token');
+    await page.locator('#btn-gh-stang').click();
+    await expect(page.locator('#ticker-text')).toContainText('Tryck Anslut');
+  });
+
+  test('anslut med token bygger staden av mina repon', { annotation: { type: 'testfall', description: 'TC-GIT-01' } }, async ({ page, api }) => {
+    await page.goto('./');
+    await expect(page.locator('#btn-konto')).toHaveText('Anslut');
     await expect(page.getByRole('dialog', { name: 'Anslut GitHub' })).toBeVisible();
     await bild(page, 'Anslut GitHub');
     await page.locator('#token').fill(TOKEN);
@@ -52,8 +66,9 @@ test.describe('GitHub', () => {
     await expect(page.locator('#kort-status')).toContainText('distriktet är övergivet, ingen commit på 12 år');
   });
 
-  test('fel token ger tydligt fel och sparas inte', { annotation: { type: 'testfall', description: 'TC-GIT-02' } }, async ({ staden: page, api }) => {
-    await page.locator('#btn-github').click();
+  test('fel token ger tydligt fel och sparas inte', { annotation: { type: 'testfall', description: 'TC-GIT-02' } }, async ({ page, api }) => {
+    await page.goto('./');
+    await expect(page.getByRole('dialog', { name: 'Anslut GitHub' })).toBeVisible();
     await page.locator('#token').fill('hej');
     await page.getByRole('button', { name: 'Anslut', exact: true }).click();
     await expect(page.locator('#token-msg')).toContainText('ser inte ut som en GitHub-token');
@@ -63,7 +78,7 @@ test.describe('GitHub', () => {
     await page.getByRole('button', { name: 'Anslut', exact: true }).click();
     await expect(page.locator('#token-msg')).toContainText('GitHub godtar inte token');
     expect(await page.evaluate(() => localStorage.getItem('cs-token'))).toBeNull();
-    await expect(page.locator('#btn-konto')).toHaveText('Demo');
+    await expect(page.locator('#btn-konto')).toHaveText('Anslut');
   });
 
   test('Vad brinner? visar workflow, steg, fel och länk till körningen', { annotation: { type: 'testfall', description: 'TC-GIT-03' } }, async ({ page, api }) => {
@@ -103,7 +118,7 @@ test.describe('GitHub', () => {
     expect((await lage(page)).brander).toEqual(['beta']);
   });
 
-  test('logga ut tar bort token och visar demostaden', { annotation: { type: 'testfall', description: 'TC-GIT-05' } }, async ({ page, api }) => {
+  test('logga ut tar bort token och tömmer staden', { annotation: { type: 'testfall', description: 'TC-GIT-05' } }, async ({ page, api }) => {
     await ansluten(page);
     await page.goto('./');
     await vantaPaStad(page, 3);
@@ -113,20 +128,21 @@ test.describe('GitHub', () => {
     await expect(page.locator('#gh-status')).toContainText('3 distrikt');
     await page.getByRole('button', { name: 'Logga ut' }).click();
 
-    const demo = await page.evaluate(() => window.CsDemo.repon.length);
-    await vantaPaStad(page, demo);
-    await expect(page.locator('#btn-konto')).toHaveText('Demo');
+    await vantaPaStad(page, 0);
+    await expect(page.locator('#btn-konto')).toHaveText('Anslut');
     expect(await page.evaluate(() => [localStorage.getItem('cs-token'), localStorage.getItem('cs-stad-cache')])).toEqual([null, null]);
     await page.reload();
-    await vantaPaStad(page, demo);
-    await expect(page.locator('#btn-konto')).toHaveText('Demo');
+    await vantaPaStad(page, 0);
+    await expect(page.locator('#btn-konto')).toHaveText('Anslut');
+    await expect(page.getByRole('dialog', { name: 'Anslut GitHub' })).toBeVisible();
   });
 
-  test('utgången token vid start visar demon och ber om ny token', { annotation: { type: 'testfall', description: 'TC-GIT-06' } }, async ({ page, api }) => {
+  test('utgången token vid start tömmer staden och ber om ny token', { annotation: { type: 'testfall', description: 'TC-GIT-06' } }, async ({ page, api }) => {
     await page.addInitScript(() => { try { localStorage.setItem('cs-token', 'github_pat_GAMMALTOKEN12345'); } catch (e) {} });
     await page.goto('./');
     await expect(page.getByRole('dialog', { name: 'Anslut GitHub' })).toBeVisible();
     await expect(page.locator('#token-msg')).toContainText('Skapa en ny token');
-    await expect(page.locator('#btn-konto')).toHaveText('Demo');
+    await expect(page.locator('#btn-konto')).toHaveText('Anslut');
+    expect((await lage(page)).distrikt).toHaveLength(0);
   });
 });

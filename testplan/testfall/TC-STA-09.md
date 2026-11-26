@@ -8,7 +8,7 @@
 | **Prioritet** | Hög |
 | **Typ** | 🤖 Automatiserad |
 | **Krav** | [SPEC.md](../../SPEC.md) |
-| **Playwright** | [`tests/stad.spec.js`](../../tests/stad.spec.js#L122) – *tryck på ett tak eller en skylt ger rätt distrikt* |
+| **Playwright** | [`tests/stad.spec.js`](../../tests/stad.spec.js#L121) – *tryck på ett tak eller en skylt ger rätt distrikt* |
 
 ## Förutsättningar
 
